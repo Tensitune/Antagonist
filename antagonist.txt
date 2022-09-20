@@ -1,0 +1,17 @@
+"antagonist"
+{
+    "base"          "sandbox"
+    "title"         "Antagonist"
+    "version"       "0.0.1"
+    "category"      "rp"
+    "menusystem"    "1"
+    "workshopid"    ""
+
+    "author_name"   "Tensitune"
+    "author_email"  ""
+    "author_url"    "https://github.com/Tensitune/Antagonist"
+
+    "icon"  ""
+    "info"  ""
+    "hide"  "0"
+}
