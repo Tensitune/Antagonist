@@ -4,11 +4,22 @@ function GM:Initialize()
     self.Sandbox.Initialize(self)
 end
 
+function GM:CanDropWeapon(weapon)
+    if not IsValid(weapon) then return false end
+    local class = string.lower(weapon:GetClass())
+
+    if self.Config.DisallowDrop[class] then return false end
+
+    return true
+end
+
 --[[---------------------------------------------------------
  Gamemode functions
  ---------------------------------------------------------]]
 local function checkAdminSpawn(ply)
     if ply:IsSuperAdmin() then return true end
+
+    Antagonist.Notify(ply, NOTIFY_ERROR, 5, "You need super admin privileges in order to be able to do this.")
     return false
 end
 
@@ -21,6 +32,8 @@ function GM:PlayerSpawnedProp(ply, model, ent)
     ent.SID = ply.SID
 
     if self.Config.PropCrafting then
+        Antagonist.Notify(ply, NOTIFY_ERROR, 5, "You cannot afford this.")
+
         SafeRemoveEntity(ent)
         return false
     end
@@ -259,6 +272,22 @@ function GM:PlayerShouldTaunt(ply, actid)
     return self.Config.AllowActs
 end
 
+function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
+    local weapon = ply:GetActiveWeapon()
+    local canDrop = hook.Call("CanDropWeapon", self, weapon)
+
+    if GAMEMODE.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
+        ply:DropWeapon(weapon)
+    end
+
+    self.Sandbox.DoPlayerDeath(self, ply, attacker, dmginfo, ...)
+end
+
+function GM:PlayerDeath(ply, weapon, attacker)
+    ply:Extinguish()
+    ply:ExitVehicle()
+end
+
 function GM:PlayerInitialSpawn(ply)
     self.Sandbox.PlayerInitialSpawn(self, ply)
 
@@ -275,4 +304,40 @@ function GM:PlayerInitialSpawn(ply)
             ply:SetUserGroup(group)
         end
     end)
+end
+
+function GM:GetFallDamage(ply, fallSpeed)
+    if GetConVar("mp_falldamage"):GetBool() or self.Config.RealisticFallDamage then
+        return self.Config.FallDamageDamper and (fallSpeed / self.Config.FallDamageDamper) or (fallSpeed / 15)
+    else
+        return self.Config.FallDamageAmount or 10
+    end
+end
+
+Antagonist.InitPostEntityCalled = Antagonist.InitPostEntityCalled or false
+function GM:InitPostEntity()
+    Antagonist.InitPostEntityCalled = true
+
+    local physData = physenv.GetPerformanceSettings()
+    physData.MaxVelocity = 2000
+    physData.MaxAngularVelocity = 3636
+
+    physenv.SetPerformanceSettings(physData)
+
+    game.ConsoleCommand("physgun_DampingFactor 0.9\n")
+    game.ConsoleCommand("sv_sticktoground 0\n")
+    game.ConsoleCommand("sv_airaccelerate 1000\n")
+    -- sv_alltalk must be 0
+    -- Note, everyone will STILL hear everyone UNLESS GM.Config.voiceradius is set to true
+    -- This will fix the GM.Config.VoiceRadius not working
+    game.ConsoleCommand("sv_alltalk 0\n")
+end
+timer.Simple(0.1, function()
+    if !Antagonist.InitPostEntityCalled then
+        hook.Call("InitPostEntity", GM)
+    end
+end)
+
+function GM:PlayerSpray()
+    return !GAMEMODE.Config.AllowSprays
 end

@@ -3,12 +3,16 @@ Antagonist config settings.
 -----------------------------------------------------------------------------]]
 -- Acts/Taunts - Enable/disable Taunts (e.g. act salute)
 GM.Config.AllowActs = false
+-- AllowSprays - Enable/disable the use of sprays on the server.
+GM.Config.AllowSprays = true
 -- DropWeaponDeath - Enable/disable whether people drop their current weapon when they die.
 GM.Config.DropWeaponDeath = true
 -- PropCrafting - Whether or not players should use resources for spawning props.
 GM.Config.PropCrafting = true
 -- PropSpawning - Enable/disable props spawning. Applies to admins too.
 GM.Config.PropSpawning = true
+-- RealisticFallDamage - Enable/Disable dynamic fall damage. Setting mp_falldamage to 1 will over-ride this.
+GM.Config.RealisticFallDamage = true
 
 --[[---------------------------------------------------------------------------
 Voice settings
@@ -21,6 +25,14 @@ GM.Config.VoiceRadius = true
 GM.Config.DynamicVoice = true
 -- DeadVoice - Enable/disable whether people talk through the microphone while dead.
 GM.Config.DeadVoice = true
+
+--[[---------------------------------------------------------------------------
+Value settings
+---------------------------------------------------------------------------]]
+-- FallDamageDamper - The damper on realistic fall damage. Default is 15. Decrease this for more damage.
+GM.Config.FallDamageDamper = 15
+-- FallDamageAmount - The base damage taken from falling for static fall damage. Default is 10.
+GM.Config.FallDamageAmount = 10
 
 --[[---------------------------------------------------------------------------
 Chat distance settings
