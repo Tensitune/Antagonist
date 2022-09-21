@@ -7,7 +7,7 @@
     "menusystem"    "1"
     "workshopid"    ""
 
-    "author_name"   "Tensitune"
+    "author_name"   "Tensitune & dj-34"
     "author_email"  ""
     "author_url"    "https://github.com/Tensitune/Antagonist"
 
