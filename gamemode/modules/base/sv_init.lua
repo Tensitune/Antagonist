@@ -8,7 +8,7 @@ function GM:CanDropWeapon(weapon)
     if not IsValid(weapon) then return false end
     local class = string.lower(weapon:GetClass())
 
-    if self.Config.DisallowDrop[class] then return false end
+    if Antagonist.Config.DisallowDrop[class] then return false end
 
     return true
 end
@@ -19,20 +19,20 @@ end
 local function checkAdminSpawn(ply)
     if ply:IsSuperAdmin() then return true end
 
-    Antagonist.Notify(ply, NOTIFY_ERROR, 5, "You need super admin privileges in order to be able to do this.")
+    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase("needXPrivelege", Antagonist.GetPhrase("sadmin")))
     return false
 end
 
 function GM:PlayerSpawnProp(ply, model)
-    return self.Config.PropSpawning and self.Sandbox.PlayerSpawnProp(self, ply, model)
+    return Antagonist.Config.PropSpawning and self.Sandbox.PlayerSpawnProp(self, ply, model)
 end
 
 function GM:PlayerSpawnedProp(ply, model, ent)
     self.Sandbox.PlayerSpawnedProp(self, ply, model, ent)
     ent.SID = ply.SID
 
-    if self.Config.PropCrafting then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 5, "You cannot afford this.")
+    if Antagonist.Config.PropCrafting then
+        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase("notEnoughResources"))
 
         SafeRemoveEntity(ent)
         return false
@@ -94,11 +94,11 @@ local function isInRoom(listenerShootPos, talkerShootPos, talker)
     return !roomTraceResult.HitWorld
 end
 
-local voice3D = GM.Config.Voice3D
-local voiceRadius = GM.Config.VoiceRadius
-local dynamicVoice = GM.Config.DynamicVoice
-local deadVoice = GM.Config.DeadVoice
-local voiceDistance = GM.Config.VoiceDistance * GM.Config.VoiceDistance
+local voice3D = Antagonist.Config.Voice3D
+local voiceRadius = Antagonist.Config.VoiceRadius
+local dynamicVoice = Antagonist.Config.DynamicVoice
+local deadVoice = Antagonist.Config.DeadVoice
+local voiceDistance = Antagonist.Config.VoiceDistance * Antagonist.Config.VoiceDistance
 local canHearPlayers = {}
 
 -- Recreate canHearPlayers after Lua Refresh
@@ -109,7 +109,7 @@ end
 -- Grid based position check
 local grid
 -- Grid cell size is equal to the size of the radius of player talking
-local gridSize = GM.Config.VoiceDistance
+local gridSize = Antagonist.Config.VoiceDistance
 -- Translate player to grid coordinates. The first table maps players to x coordinates, the second table maps players to y coordinates.
 local playerToGrid = { {}, {} }
 
@@ -257,7 +257,7 @@ function GM:CanDrive(ply, ent)
 end
 
 function GM:CanProperty(ply, property, ent)
-    if self.Config.AllowedProperties[property] then
+    if Antagonist.Config.AllowedProperties[property] then
         return true
     end
 
@@ -269,14 +269,14 @@ function GM:CanProperty(ply, property, ent)
 end
 
 function GM:PlayerShouldTaunt(ply, actid)
-    return self.Config.AllowActs
+    return Antagonist.Config.AllowActs
 end
 
 function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
     local weapon = ply:GetActiveWeapon()
     local canDrop = hook.Call("CanDropWeapon", self, weapon)
 
-    if GAMEMODE.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
+    if Antagonist.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
         ply:DropWeapon(weapon)
     end
 
@@ -298,19 +298,21 @@ function GM:PlayerInitialSpawn(ply)
         if !IsValid(ply) then return end
 
         local steamid = ply:SteamID()
-        local group = GAMEMODE.Config.DefaultPlayerGroups[steamid]
+        local group = Antagonist.Config.DefaultPlayerGroups[steamid]
 
         if group then
             ply:SetUserGroup(group)
         end
+
+        ply.CommandDelays = {}
     end)
 end
 
 function GM:GetFallDamage(ply, fallSpeed)
-    if GetConVar("mp_falldamage"):GetBool() or self.Config.RealisticFallDamage then
-        return self.Config.FallDamageDamper and (fallSpeed / self.Config.FallDamageDamper) or (fallSpeed / 15)
+    if GetConVar("mp_falldamage"):GetBool() or Antagonist.Config.RealisticFallDamage then
+        return Antagonist.Config.FallDamageDamper and (fallSpeed / Antagonist.Config.FallDamageDamper) or (fallSpeed / 15)
     else
-        return self.Config.FallDamageAmount or 10
+        return Antagonist.Config.FallDamageAmount or 10
     end
 end
 
@@ -328,8 +330,8 @@ function GM:InitPostEntity()
     game.ConsoleCommand("sv_sticktoground 0\n")
     game.ConsoleCommand("sv_airaccelerate 1000\n")
     -- sv_alltalk must be 0
-    -- Note, everyone will STILL hear everyone UNLESS GM.Config.voiceradius is set to true
-    -- This will fix the GM.Config.VoiceRadius not working
+    -- Note, everyone will STILL hear everyone UNLESS Antagonist.Config.voiceradius is set to true
+    -- This will fix the Antagonist.Config.VoiceRadius not working
     game.ConsoleCommand("sv_alltalk 0\n")
 end
 timer.Simple(0.1, function()
@@ -339,5 +341,5 @@ timer.Simple(0.1, function()
 end)
 
 function GM:PlayerSpray()
-    return !GAMEMODE.Config.AllowSprays
+    return !Antagonist.Config.AllowSprays
 end

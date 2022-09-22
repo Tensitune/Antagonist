@@ -6,9 +6,10 @@ DeriveGamemode("sandbox")
 DEFINE_BASECLASS("gamemode_sandbox")
 
 GM.Sandbox = BaseClass
-GM.Config = GM.Config or {}
 
 Antagonist = Antagonist or {}
+Antagonist.Config = Antagonist.Config or {}
+Antagonist.FolderName = GM.FolderName
 
 if SERVER then
     AddCSLuaFile("config/config.lua")
@@ -23,8 +24,8 @@ local function LoadModules()
     local root = GM.FolderName .. "/gamemode/modules/"
     local files, folders = file.Find(root .. "*", "LUA")
 
-    for _, file in ipairs(files) do
-        if string.GetExtensionFromFilename(file) ~= "lua" then continue end
+    for _, file in next, files do
+        if string.GetExtensionFromFilename(file) != "lua" then continue end
         include(root .. file)
     end
 

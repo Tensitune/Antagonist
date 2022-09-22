@@ -5,35 +5,58 @@ NOTIFY_ERROR = 1
 NOTIFY_UNDO = 2
 NOTIFY_HINT = 3
 
-function Antagonist.Notify(recipients, notificationType, length, message)
-    if IsValid(recipients) and istable(recipients) then
-        local recipientsCount = #recipients
-        if recipientsCount == 0 then return end
-
-        for i = 1, recipientsCount do 
-            local ply = recipients[i]
-
-            if !IsValid(ply) then continue end
-            if !ply:IsPlayer() then continue end
-
-            net.Start("Antagonist.Notification")
-            net.WriteInt(notificationType, 3)
-            net.WriteInt(length, 6)
-            net.WriteString(message)
-            net.Send(ply)
-        end
-
-        return
-    end 
-
+function Antagonist.Notify(recipient, notificationType, length, message)
     net.Start("Antagonist.Notification")
     net.WriteInt(notificationType, 3)
     net.WriteInt(length, 6)
     net.WriteString(message)
 
-    if !recipients then
-        net.Broadcast()
+    if (IsValid(recipient) and recipient:IsPlayer()) or istable(recipient) then
+        net.Send(recipient)
     else
-        net.Send(recipients)
+        net.Broadcast()
     end
+end
+
+local function sendChatMessage(sender, recipient, prefix, message)
+    if !IsValid(sender) and !recipient then return end
+
+    net.Start("Antagonist.Chat")
+    net.WriteEntity(sender)
+    net.WriteString(prefix)
+    net.WriteString(message)
+    net.Send(recipient)
+end
+
+function Antagonist.TalkToRange(range, prefix, sender, message)
+    if !IsValid(sender) then return end
+
+    if !prefix then prefix = "" end
+    if !message then message = "" end
+
+    local eyePos = sender:EyePos()
+    local rangeSqr = range * range
+
+    local filter = {}
+    local players = player.GetHumans()
+    local concatText = prefix .. ": " .. message
+    
+    for i = 1, #players do
+        local recipient = players[i]
+        
+        if recipient == sender or recipient:EyePos():DistToSqr(eyePos) <= rangeSqr then
+            table.insert(filter, recipient)
+        end
+    end
+
+    sendChatMessage(sender, filter, prefix, message)
+end
+
+function Antagonist.TalkToPerson(prefix, sender, recipient, message)
+    if not IsValid(recipient) then return end
+
+    if !prefix then prefix = "" end
+    if !message then message = "" end
+
+    sendChatMessage(sender, recipient, prefix, message)
 end
