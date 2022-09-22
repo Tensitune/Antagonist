@@ -26,7 +26,7 @@ function Antagonist.DeclareChatCommand(command)
 
     command.name = string.lower(command.name)
     Antagonist.ChatCommands[command.name] = Antagonist.ChatCommands[command.name] or command
-    
+
     for k, v in next, command do
         Antagonist.ChatCommands[command.name][k] = v
     end

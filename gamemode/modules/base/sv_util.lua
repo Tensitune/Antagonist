@@ -39,11 +39,10 @@ function Antagonist.TalkToRange(range, prefix, sender, message)
 
     local filter = {}
     local players = player.GetHumans()
-    local concatText = prefix .. ": " .. message
-    
+
     for i = 1, #players do
         local recipient = players[i]
-        
+
         if recipient == sender or recipient:EyePos():DistToSqr(eyePos) <= rangeSqr then
             table.insert(filter, recipient)
         end
@@ -53,7 +52,7 @@ function Antagonist.TalkToRange(range, prefix, sender, message)
 end
 
 function Antagonist.TalkToPerson(prefix, sender, recipient, message)
-    if not IsValid(recipient) then return end
+    if !IsValid(recipient) then return end
 
     if !prefix then prefix = "" end
     if !message then message = "" end

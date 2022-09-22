@@ -24,31 +24,31 @@ local function LoadModules()
     local root = GM.FolderName .. "/gamemode/modules/"
     local files, folders = file.Find(root .. "*", "LUA")
 
-    for _, file in next, files do
-        if string.GetExtensionFromFilename(file) != "lua" then continue end
-        include(root .. file)
+    for _, fileName in next, files do
+        if string.GetExtensionFromFilename(fileName) != "lua" then continue end
+        include(root .. fileName)
     end
 
     for _, folder in SortedPairs(folders, true) do
-        for _, File in SortedPairs(file.Find(root .. folder .. "/sh_*.lua", "LUA"), true) do
+        for _, fileName in SortedPairs(file.Find(root .. folder .. "/sh_*.lua", "LUA"), true) do
             if SERVER then
-                AddCSLuaFile(root .. folder .. "/" .. File)
+                AddCSLuaFile(root .. folder .. "/" .. fileName)
             end
 
-            include(root .. folder .. "/" .. File)
+            include(root .. folder .. "/" .. fileName)
         end
-        
+
         if SERVER then
-            for _, File in SortedPairs(file.Find(root .. folder .. "/sv_*.lua", "LUA"), true) do
-                include(root .. folder .. "/" .. File)
+            for _, fileName in SortedPairs(file.Find(root .. folder .. "/sv_*.lua", "LUA"), true) do
+                include(root .. folder .. "/" .. fileName)
             end
         end
 
-        for _, File in SortedPairs(file.Find(root .. folder .. "/cl_*.lua", "LUA"), true) do
+        for _, fileName in SortedPairs(file.Find(root .. folder .. "/cl_*.lua", "LUA"), true) do
             if SERVER then
-                AddCSLuaFile(root .. folder .. "/" .. File)
+                AddCSLuaFile(root .. folder .. "/" .. fileName)
             else
-                include(root .. folder .. "/" .. File)
+                include(root .. folder .. "/" .. fileName)
             end
         end
     end

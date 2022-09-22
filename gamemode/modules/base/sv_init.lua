@@ -5,7 +5,7 @@ function GM:Initialize()
 end
 
 function GM:CanDropWeapon(weapon)
-    if not IsValid(weapon) then return false end
+    if !IsValid(weapon) then return false end
     local class = string.lower(weapon:GetClass())
 
     if Antagonist.Config.DisallowDrop[class] then return false end
@@ -201,18 +201,18 @@ timer.Create("Antagonist.CanHearPlayersVoice", Antagonist.VoiceCheckTimeDelay, 0
 
             local cellLength = #cell
             for k = 1, cellLength do
-                local player = cell[k]
+                local ply = cell[k]
 
                 for l = k + 1, cellLength do
                     local nextPlayer = cell[l]
 
                     -- VoiceRadius is on and the two are within hearing distance
                     -- DynamicVoice is on and players are in the same room
-                    local canTalk = playerPos[player]:DistToSqr(playerPos[nextPlayer]) < voiceDistance and
-                                        (!dynamicVoice or isInRoom(eyePos[player], eyePos[nextPlayer], nextPlayer))
+                    local canTalk = playerPos[ply]:DistToSqr(playerPos[nextPlayer]) < voiceDistance and
+                                        (!dynamicVoice or isInRoom(eyePos[ply], eyePos[nextPlayer], nextPlayer))
 
-                    canHearPlayers[player][nextPlayer] = canTalk and (deadVoice or nextPlayer:Alive())
-                    canHearPlayers[nextPlayer][player] = canTalk and (deadVoice or player:Alive()) -- Take advantage of the symmetry
+                    canHearPlayers[ply][nextPlayer] = canTalk and (deadVoice or nextPlayer:Alive())
+                    canHearPlayers[nextPlayer][ply] = canTalk and (deadVoice or ply:Alive()) -- Take advantage of the symmetry
                 end
             end
         end

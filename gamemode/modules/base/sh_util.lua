@@ -7,8 +7,6 @@ end
 
 local stringSub, tableInsert = string.sub, table.insert
 function Antagonist.ExplodeArgs(args)
-    local args = {}
-
     local from, to, diff = 1, 0, 0
     local inQuotes, wasQuotes = false, false
 

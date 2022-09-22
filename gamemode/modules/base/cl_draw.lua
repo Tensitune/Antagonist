@@ -8,6 +8,6 @@ function chat.AddNonParsedText(...)
     for i = 2, #tbl, 2 do
         tbl[i] = safeText(tbl[i])
     end
-    
+
     return chat.AddText(unpack(tbl))
 end
