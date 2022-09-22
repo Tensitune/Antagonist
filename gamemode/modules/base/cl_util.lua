@@ -1,10 +1,5 @@
 function Antagonist.Notify(notificationType, length, message)
-    local sound = notificationType == NOTIFY_ERROR and "buttons/button16.wav"
-                    or notificationType == NOTIFY_HINT and "ambient/water/rain_drip1.wav"
-                    or "ambient/water/rain_drip3.wav"
-
     notification.AddLegacy(message, notificationType, length)
-    surface.PlaySound(sound)
 end
 
 net.Receive("Antagonist.Notification", function()
