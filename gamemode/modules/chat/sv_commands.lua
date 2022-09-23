@@ -1,6 +1,6 @@
 local function meChatCommand(ply, args, text)
     if text == "" then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase("invalidArgs"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase(ply.Language, "invalidArgs"))
         return
     end
 
@@ -10,12 +10,12 @@ Antagonist.RegisterChatCommand("me", meChatCommand)
 
 local function oocChatCommand(ply, args, text)
     if !Antagonist.Config.OOC then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase("disabledOOC"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase(ply.Language, "disabledOOC"))
         return
     end
 
     if text == "" then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase("invalidArgs"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase(ply.Language, "invalidArgs"))
         return
     end
 
@@ -31,7 +31,7 @@ Antagonist.RegisterChatCommand("ooc", oocChatCommand)
 
 local function loocChatCommand(ply, args, text)
     if text == "" then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase("invalidArgs"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase(ply.Language, "invalidArgs"))
         return
     end
 

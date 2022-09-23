@@ -8,6 +8,12 @@ Antagonist.AddTranslation("ru", {
     cantAfford = "Вы не можете себе позволить это.",
     notEnoughResources = "У вас недостаточно ресурсов для крафта.",
 
+    -- Talking
+    hear_noone = "Вас никто не слышит!",
+    hear_everyone = "Вас слышат все!",
+    hear_certain_persons = "Игроки, которые вас слышат:",
+
+    -- Misc
     admin = "администратора",
     sadmin = "супер администратора",
 })

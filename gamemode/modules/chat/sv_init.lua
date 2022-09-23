@@ -26,7 +26,7 @@ function GM:CanUseChatCommand(ply, commandName)
     local cmd = Antagonist.GetChatCommand(commandName)
 
     if !cmd then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase("cmdNotFound"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "cmdNotFound"))
         return false
     end
 
@@ -38,7 +38,7 @@ function GM:CanUseChatCommand(ply, commandName)
         end)
 
         if !canUseCommand then
-            Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase("noPrivilege"))
+            Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "noPrivilege"))
             return false
         end
     end

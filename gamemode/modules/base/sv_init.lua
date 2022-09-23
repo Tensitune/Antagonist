@@ -19,7 +19,7 @@ end
 local function checkAdminSpawn(ply)
     if ply:IsSuperAdmin() then return true end
 
-    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase("needXPrivelege", Antagonist.GetPhrase("sadmin")))
+    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "needXPrivelege", Antagonist.GetPhrase(ply.Language, "sadmin")))
     return false
 end
 
@@ -32,7 +32,7 @@ function GM:PlayerSpawnedProp(ply, model, ent)
     ent.SID = ply.SID
 
     if Antagonist.Config.PropCrafting then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase("notEnoughResources"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "notEnoughResources"))
 
         SafeRemoveEntity(ent)
         return false

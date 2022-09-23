@@ -23,6 +23,12 @@ Antagonist.AddTranslation("en", {
     cantAfford = "You cannot afford this.",
     notEnoughResources = "You don't have enough resources to craft.",
 
+    -- Talking
+    hear_noone = "No-one can hear you!",
+    hear_everyone = "Everyone can hear you!",
+    hear_certain_persons = "Players who can hear you:",
+
+    -- Misc
     admin = "admin",
     sadmin = "superadmin",
 })

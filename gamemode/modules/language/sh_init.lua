@@ -1,3 +1,5 @@
+Antagonist.Languages = Antagonist.Languages or {}
+
 local translations = {}
 local gmodLanguage = GetConVar("gmod_language"):GetString()
 
@@ -6,10 +8,11 @@ local files = file.Find(root .. "*", "LUA")
 
 function Antagonist.AddTranslation(name, translation)
     translations[name] = translation
+    table.insert(Antagonist.Languages, name)
 end
 
-function Antagonist.GetPhrase(name, ...)
-    local translation = translations[gmodLanguage] or translations.en
+function Antagonist.GetPhrase(lang, name, ...)
+    local translation = translations[lang] or translations[gmodLanguage] or translations.en
     return translation[name] and string.format(translation[name], ...) or ""
 end
 
