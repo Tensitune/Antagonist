@@ -11,11 +11,14 @@ Antagonist = Antagonist or {}
 Antagonist.Config = Antagonist.Config or {}
 
 if SERVER then
-    AddCSLuaFile("config/config.lua")
     AddCSLuaFile("libraries/sh_cami.lua")
+    AddCSLuaFile("libraries/tll.lua")
+    AddCSLuaFile("config/config.lua")
+    AddCSLuaFile("config/roles.lua")
 end
 
 include("libraries/sh_cami.lua")
+include("libraries/tll.lua")
 include("config/config.lua")
 
 local function LoadModules()
@@ -51,5 +54,6 @@ local function LoadModules()
         end
     end
 end
-
 LoadModules()
+
+include("config/roles.lua")

@@ -42,6 +42,8 @@ end
 function GM:PlayerInitialSpawn(ply)
     self.Sandbox.PlayerInitialSpawn(self, ply)
 
+    ply:SetTeam(Antagonist.Roles.Default)
+
     -- Initialize canHearPlayers for player (used for voice radius check)
     canHearPlayers[ply] = {}
 
@@ -84,7 +86,7 @@ function GM:PlayerSpawnedProp(ply, model, ent)
     ent.SID = ply.SID
 
     if Antagonist.Config.PropCrafting then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "notEnoughResources"))
+        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "not_enough_resources"))
 
         SafeRemoveEntity(ent)
         return false
@@ -94,7 +96,7 @@ end
 local function checkAdminSpawn(ply)
     if ply:IsSuperAdmin() then return true end
 
-    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "needXPrivelege", Antagonist.GetPhrase(ply.Language, "sadmin")))
+    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "need_x_privelege", Antagonist.GetPhrase(ply.Language, "sadmin")))
     return false
 end
 

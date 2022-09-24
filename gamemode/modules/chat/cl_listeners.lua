@@ -12,7 +12,7 @@ local function getChatRecipients()
     local rangeSqr = range * range
 
     recipients = {}
-    local players = player.GetHumans()
+    local players = player.GetAll()
 
     for i = 1, #players do
         local ply = players[i]

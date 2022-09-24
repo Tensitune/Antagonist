@@ -1,6 +1,6 @@
 Antagonist.ChatCommands = Antagonist.ChatCommands or {}
 
-local IChatCommand = {
+local chatCommandSchema = {
     name = isstring,
     description = isstring,
     condition = isfunction,
@@ -8,27 +8,15 @@ local IChatCommand = {
     arguments = istable,
 }
 
-local function checkChatCommand(command)
-    for k in next, command do
-        if !IChatCommand[k](command[k]) then
-            return false, k
-        end
-    end
-
-    return true
-end
-
 function Antagonist.DeclareChatCommand(command)
-    local valid, element = checkChatCommand(command)
-    if !valid then
-        ErrorNoHalt(("Incorrect chat command! %s is invalid!"):format(element))
-    end
+    local valid = TLL.CheckTableValidation(chatCommandSchema, command, "chat command")
+    if !valid then return end
 
-    command.name = string.lower(command.name)
-    Antagonist.ChatCommands[command.name] = Antagonist.ChatCommands[command.name] or command
+    local name = string.lower(command.name)
+    Antagonist.ChatCommands[name] = Antagonist.ChatCommands[name] or command
 
     for k, v in next, command do
-        Antagonist.ChatCommands[command.name][k] = v
+        Antagonist.ChatCommands[name][k] = v
     end
 end
 
@@ -49,18 +37,18 @@ Chat commands
 ---------------------------------------------------------------------------]]
 Antagonist.DeclareChatCommand({
     name = "me",
-    description = "Chat roleplay to say you're doing things that you can't show otherwise.",
+    description = Antagonist.GetPhrase(nil, "command_me"),
     delay = 1,
 })
 
 Antagonist.DeclareChatCommand({
     name = "ooc",
-    description = "Out of character non-roleplay global chat.",
+    description = Antagonist.GetPhrase(nil, "command_ooc"),
     delay = 1,
 })
 
 Antagonist.DeclareChatCommand({
     name = "looc",
-    description = "Out of character non-roleplay local chat.",
+    description = Antagonist.GetPhrase(nil, "command_looc"),
     delay = 1,
 })
