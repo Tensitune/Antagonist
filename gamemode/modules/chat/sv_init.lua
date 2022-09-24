@@ -15,7 +15,7 @@ function Antagonist.RegisterChatCommand(commandName, callback, privilegeName)
         local canUseCommand = gamemode.Call("CanUseChatCommand", ply, cmd)
         if !canUseCommand then return "" end
 
-        local ret = { callback(ply, arg, ...) }
+        local ret = {callback(ply, arg, ...)}
         return unpack(ret)
     end
 
