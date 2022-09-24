@@ -1,26 +1,78 @@
 local mathFloor = math.floor
 
+local voice3D = Antagonist.Config.Voice3D
+local voiceRadius = Antagonist.Config.VoiceRadius
+local dynamicVoice = Antagonist.Config.DynamicVoice
+local deadVoice = Antagonist.Config.DeadVoice
+local voiceDistance = Antagonist.Config.VoiceDistance * Antagonist.Config.VoiceDistance
+
+local canHearPlayers = {}
+local chPlayers = player.GetHumans()
+
+-- Recreate canHearPlayers after Lua Refresh
+for i = 1, #chPlayers do
+    local ply = chPlayers[i]
+    canHearPlayers[ply] = {}
+end
+
 function GM:Initialize()
     self.Sandbox.Initialize(self)
 end
 
-function GM:CanDropWeapon(weapon)
-    if !IsValid(weapon) then return false end
-    local class = string.lower(weapon:GetClass())
+function GM:InitPostEntity()
+    local physData = physenv.GetPerformanceSettings()
+    physData.MaxVelocity = 2000
+    physData.MaxAngularVelocity = 3636
 
-    if Antagonist.Config.DisallowDrop[class] then return false end
+    physenv.SetPerformanceSettings(physData)
 
-    return true
+    game.ConsoleCommand("physgun_DampingFactor 0.9\n")
+    game.ConsoleCommand("sv_sticktoground 0\n")
+    game.ConsoleCommand("sv_airaccelerate 1000\n")
+    -- sv_alltalk must be 0
+    -- Note, everyone will STILL hear everyone UNLESS Antagonist.Config.voiceradius is set to true
+    -- This will fix the Antagonist.Config.VoiceRadius not working
+    game.ConsoleCommand("sv_alltalk 0\n")
 end
 
---[[---------------------------------------------------------
- Gamemode functions
- ---------------------------------------------------------]]
-local function checkAdminSpawn(ply)
-    if ply:IsSuperAdmin() then return true end
+function GM:PlayerDisconnected(ply)
+    canHearPlayers[ply] = nil -- Clear to avoid memory leaks
+end
 
-    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "needXPrivelege", Antagonist.GetPhrase(ply.Language, "sadmin")))
-    return false
+function GM:PlayerInitialSpawn(ply)
+    self.Sandbox.PlayerInitialSpawn(self, ply)
+
+    -- Initialize canHearPlayers for player (used for voice radius check)
+    canHearPlayers[ply] = {}
+
+    timer.Simple(1, function()
+        if !IsValid(ply) then return end
+
+        local steamid = ply:SteamID()
+        local group = Antagonist.Config.DefaultPlayerGroups[steamid]
+
+        if group then
+            ply:SetUserGroup(group)
+        end
+
+        ply.CommandDelays = {}
+    end)
+end
+
+function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
+    local weapon = ply:GetActiveWeapon()
+    local canDrop = hook.Call("CanDropWeapon", self, weapon)
+
+    if Antagonist.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
+        ply:DropWeapon(weapon)
+    end
+
+    self.Sandbox.DoPlayerDeath(self, ply, attacker, dmginfo, ...)
+end
+
+function GM:PlayerDeath(ply, weapon, attacker)
+    ply:Extinguish()
+    ply:ExitVehicle()
 end
 
 function GM:PlayerSpawnProp(ply, model)
@@ -37,6 +89,13 @@ function GM:PlayerSpawnedProp(ply, model, ent)
         SafeRemoveEntity(ent)
         return false
     end
+end
+
+local function checkAdminSpawn(ply)
+    if ply:IsSuperAdmin() then return true end
+
+    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "needXPrivelege", Antagonist.GetPhrase(ply.Language, "sadmin")))
+    return false
 end
 
 function GM:PlayerSpawnSWEP(ply, class, info)
@@ -79,9 +138,10 @@ function GM:KeyPress(ply, code)
     self.Sandbox.KeyPress(self, ply, code)
 end
 
--- IsInRoom function to see if the player is in the same room.
 local roomTraceResult = {}
 local roomTrace = { output = roomTraceResult }
+
+-- isInRoom function to see if the player is in the same room.
 local function isInRoom(listenerShootPos, talkerShootPos, talker)
     roomTrace.start = talkerShootPos
     roomTrace.endpos = listenerShootPos
@@ -94,18 +154,6 @@ local function isInRoom(listenerShootPos, talkerShootPos, talker)
     return !roomTraceResult.HitWorld
 end
 
-local voice3D = Antagonist.Config.Voice3D
-local voiceRadius = Antagonist.Config.VoiceRadius
-local dynamicVoice = Antagonist.Config.DynamicVoice
-local deadVoice = Antagonist.Config.DeadVoice
-local voiceDistance = Antagonist.Config.VoiceDistance * Antagonist.Config.VoiceDistance
-local canHearPlayers = {}
-
--- Recreate canHearPlayers after Lua Refresh
-for _, ply in ipairs(player.GetAll()) do
-    canHearPlayers[ply] = {}
-end
-
 -- Grid based position check
 local grid
 -- Grid cell size is equal to the size of the radius of player talking
@@ -113,9 +161,7 @@ local gridSize = Antagonist.Config.VoiceDistance
 -- Translate player to grid coordinates. The first table maps players to x coordinates, the second table maps players to y coordinates.
 local playerToGrid = { {}, {} }
 
--- Set Antagonist.voiceCheckTimeDelay before gamemode is loaded to set the time between player voice radius checks.
-Antagonist.VoiceCheckTimeDelay = Antagonist.VoiceCheckTimeDelay or 0.3
-timer.Create("Antagonist.CanHearPlayersVoice", Antagonist.VoiceCheckTimeDelay, 0, function()
+timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
     -- if VoiceRadius is off, everyone can hear everyone
     if !voiceRadius then return end
 
@@ -180,8 +226,8 @@ timer.Create("Antagonist.CanHearPlayersVoice", Antagonist.VoiceCheckTimeDelay, 0
 
                 -- VoiceRadius is on and the two are within hearing distance
                 -- DynamicVoice is on and players are in the same room
-                local canTalk = tempPlayerPos:DistToSqr(playerPos[cellPlayer]) < voiceDistance and
-                                    (!dynamicVoice or isInRoom(tempEyePos, eyePos[cellPlayer], cellPlayer))
+                local canTalk = tempPlayerPos:DistToSqr(playerPos[cellPlayer]) < voiceDistance
+                                    and (!dynamicVoice or isInRoom(tempEyePos, eyePos[cellPlayer], cellPlayer))
 
                 canHearPlayers[ply][cellPlayer] = canTalk and (deadVoice or cellPlayer:Alive())
                 canHearPlayers[cellPlayer][ply] = canTalk and (deadVoice or ply:Alive()) -- Take advantage of the symmetry
@@ -208,8 +254,8 @@ timer.Create("Antagonist.CanHearPlayersVoice", Antagonist.VoiceCheckTimeDelay, 0
 
                     -- VoiceRadius is on and the two are within hearing distance
                     -- DynamicVoice is on and players are in the same room
-                    local canTalk = playerPos[ply]:DistToSqr(playerPos[nextPlayer]) < voiceDistance and
-                                        (!dynamicVoice or isInRoom(eyePos[ply], eyePos[nextPlayer], nextPlayer))
+                    local canTalk = playerPos[ply]:DistToSqr(playerPos[nextPlayer]) < voiceDistance
+                                        and (!dynamicVoice or isInRoom(eyePos[ply], eyePos[nextPlayer], nextPlayer))
 
                     canHearPlayers[ply][nextPlayer] = canTalk and (deadVoice or nextPlayer:Alive())
                     canHearPlayers[nextPlayer][ply] = canTalk and (deadVoice or ply:Alive()) -- Take advantage of the symmetry
@@ -219,13 +265,17 @@ timer.Create("Antagonist.CanHearPlayersVoice", Antagonist.VoiceCheckTimeDelay, 0
     end
 end)
 
-hook.Add("PlayerDisconnect", "Antagonist.CanHearPlayersVoice", function(ply)
-    canHearPlayers[ply] = nil -- Clear to avoid memory leaks
-end)
-
 function GM:PlayerCanHearPlayersVoice(listener, talker)
     if !deadVoice and !talker:Alive() then return false end
     return !voiceRadius or canHearPlayers[listener][talker] == true, voice3D
+end
+
+function GM:PlayerShouldTaunt(ply, actid)
+    return Antagonist.Config.AllowActs
+end
+
+function GM:PlayerSpray()
+    return !Antagonist.Config.AllowSprays
 end
 
 function GM:CanTool(ply, trace, mode)
@@ -256,6 +306,15 @@ function GM:CanDrive(ply, ent)
     return false
 end
 
+function GM:CanDropWeapon(weapon)
+    if !IsValid(weapon) then return false end
+    local class = string.lower(weapon:GetClass())
+
+    if Antagonist.Config.DisallowDrop[class] then return false end
+
+    return true
+end
+
 function GM:CanProperty(ply, property, ent)
     if Antagonist.Config.AllowedProperties[property] then
         return true
@@ -268,78 +327,10 @@ function GM:CanProperty(ply, property, ent)
     return false
 end
 
-function GM:PlayerShouldTaunt(ply, actid)
-    return Antagonist.Config.AllowActs
-end
-
-function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
-    local weapon = ply:GetActiveWeapon()
-    local canDrop = hook.Call("CanDropWeapon", self, weapon)
-
-    if Antagonist.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
-        ply:DropWeapon(weapon)
-    end
-
-    self.Sandbox.DoPlayerDeath(self, ply, attacker, dmginfo, ...)
-end
-
-function GM:PlayerDeath(ply, weapon, attacker)
-    ply:Extinguish()
-    ply:ExitVehicle()
-end
-
-function GM:PlayerInitialSpawn(ply)
-    self.Sandbox.PlayerInitialSpawn(self, ply)
-
-    -- Initialize canHearPlayers for player (used for voice radius check)
-    canHearPlayers[ply] = {}
-
-    timer.Simple(1, function()
-        if !IsValid(ply) then return end
-
-        local steamid = ply:SteamID()
-        local group = Antagonist.Config.DefaultPlayerGroups[steamid]
-
-        if group then
-            ply:SetUserGroup(group)
-        end
-
-        ply.CommandDelays = {}
-    end)
-end
-
 function GM:GetFallDamage(ply, fallSpeed)
     if GetConVar("mp_falldamage"):GetBool() or Antagonist.Config.RealisticFallDamage then
         return Antagonist.Config.FallDamageDamper and (fallSpeed / Antagonist.Config.FallDamageDamper) or (fallSpeed / 15)
     else
         return Antagonist.Config.FallDamageAmount or 10
     end
-end
-
-Antagonist.InitPostEntityCalled = Antagonist.InitPostEntityCalled or false
-function GM:InitPostEntity()
-    Antagonist.InitPostEntityCalled = true
-
-    local physData = physenv.GetPerformanceSettings()
-    physData.MaxVelocity = 2000
-    physData.MaxAngularVelocity = 3636
-
-    physenv.SetPerformanceSettings(physData)
-
-    game.ConsoleCommand("physgun_DampingFactor 0.9\n")
-    game.ConsoleCommand("sv_sticktoground 0\n")
-    game.ConsoleCommand("sv_airaccelerate 1000\n")
-    -- sv_alltalk must be 0
-    -- Note, everyone will STILL hear everyone UNLESS Antagonist.Config.voiceradius is set to true
-    -- This will fix the Antagonist.Config.VoiceRadius not working
-    game.ConsoleCommand("sv_alltalk 0\n")
-end
-timer.Simple(0.1, function()
-    if !Antagonist.InitPostEntityCalled then
-        hook.Call("InitPostEntity", GM)
-    end
-end)
-
-function GM:PlayerSpray()
-    return !Antagonist.Config.AllowSprays
 end

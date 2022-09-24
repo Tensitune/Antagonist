@@ -9,7 +9,6 @@ GM.Sandbox = BaseClass
 
 Antagonist = Antagonist or {}
 Antagonist.Config = Antagonist.Config or {}
-Antagonist.FolderName = GM.FolderName
 
 if SERVER then
     AddCSLuaFile("config/config.lua")
@@ -19,7 +18,6 @@ end
 include("libraries/sh_cami.lua")
 include("config/config.lua")
 
-local SortedPairs = SortedPairs
 local function LoadModules()
     local root = GM.FolderName .. "/gamemode/modules/"
     local files, folders = file.Find(root .. "*", "LUA")

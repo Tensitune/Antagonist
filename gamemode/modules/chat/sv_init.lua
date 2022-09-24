@@ -30,6 +30,11 @@ function GM:CanUseChatCommand(ply, commandName)
         return false
     end
 
+    if cmd.condition != nil and !condition then
+        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "cantUseCmd"))
+        return false
+    end
+
     if cmd.restriction then
         local canUseCommand = false
 

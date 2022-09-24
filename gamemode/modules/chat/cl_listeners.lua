@@ -60,7 +60,7 @@ local function drawChatRecipients()
 end
 
 function GM:StartChat()
-    timer.Create(tag, .1, 0, getChatRecipients)
+    timer.Create(tag, 0.1, 0, getChatRecipients)
     hook.Add("HUDPaint", tag, drawChatRecipients)
 end
 
