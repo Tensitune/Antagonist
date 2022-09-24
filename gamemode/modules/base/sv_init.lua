@@ -141,7 +141,7 @@ function GM:KeyPress(ply, code)
 end
 
 local roomTraceResult = {}
-local roomTrace = { output = roomTraceResult }
+local roomTrace = {output = roomTraceResult}
 
 -- isInRoom function to see if the player is in the same room.
 local function isInRoom(listenerShootPos, talkerShootPos, talker)
@@ -161,7 +161,7 @@ local grid
 -- Grid cell size is equal to the size of the radius of player talking
 local gridSize = Antagonist.Config.VoiceDistance
 -- Translate player to grid coordinates. The first table maps players to x coordinates, the second table maps players to y coordinates.
-local playerToGrid = { {}, {} }
+local playerToGrid = {{}, {}}
 
 timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
     -- if VoiceRadius is off, everyone can hear everyone
