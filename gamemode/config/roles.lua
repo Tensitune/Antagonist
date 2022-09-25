@@ -94,7 +94,7 @@ ROLE_MEDIC = Antagonist.CreateRole({
 })
 
 --[[-------------------------------------------------------------------------
-Cops roles 
+Cops roles
 -----------------------------------------------------------------------------]]
 ROLE_POLICE = Antagonist.CreateRole({
     name = Antagonist.GetPhrase(nil, "role_police"),

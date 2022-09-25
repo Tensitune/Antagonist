@@ -141,7 +141,9 @@ function GM:KeyPress(ply, code)
 end
 
 local roomTraceResult = {}
-local roomTrace = {output = roomTraceResult}
+local roomTrace = {
+    output = roomTraceResult
+}
 
 -- isInRoom function to see if the player is in the same room.
 local function isInRoom(listenerShootPos, talkerShootPos, talker)
@@ -156,10 +158,8 @@ local function isInRoom(listenerShootPos, talkerShootPos, talker)
     return !roomTraceResult.HitWorld
 end
 
--- Grid based position check
-local grid
--- Grid cell size is equal to the size of the radius of player talking
-local gridSize = Antagonist.Config.VoiceDistance
+local grid -- Grid based position check
+local gridSize = Antagonist.Config.VoiceDistance -- Grid cell size is equal to the size of the radius of player talking
 -- Translate player to grid coordinates. The first table maps players to x coordinates, the second table maps players to y coordinates.
 local playerToGrid = {{}, {}}
 
