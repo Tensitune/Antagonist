@@ -1,11 +1,11 @@
 Antagonist.ChatCommands = Antagonist.ChatCommands or {}
 
 local chatCommandSchema = {
-    name = isstring,
-    description = isstring,
-    condition = isfunction,
-    delay = isnumber,
-    arguments = istable,
+    name = "string",
+    description = "string",
+    condition = "function",
+    delay = "number",
+    arguments = "table",
 }
 
 function Antagonist.DeclareChatCommand(command)

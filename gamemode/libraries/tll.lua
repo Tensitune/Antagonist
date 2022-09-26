@@ -22,36 +22,116 @@ SOFTWARE.
 -----------------------------------------------------------------------------]]
 
 TLL = TLL or {}
+TLL.Types = {
+    ["string"] = "string",
+    ["number"] = "number",
+    ["bool"] = "boolean",
+    ["boolean"] = "boolean",
+    ["table"] = "table",
+    ["function"] = "function",
+}
+
+--- Returns a string of table elements separated by commas.
+--- @param tbl table @The table to convert to string.
+--- @return string
+function TLL.TableToString(tbl)
+    local sortedTable = tbl
+    table.sort(sortedTable)
+
+    local str = ""
+    local sortedTableLength = #sortedTable
+
+    for i = 1, sortedTableLength do
+        local value = sortedTable[i]
+        str = str .. value .. (i == sortedTableLength and "" or ", ")
+    end
+
+    return str
+end
 
 --- Validates a table against a schema.
 --- Schema example:
 --- * {
---- *     name = isstring,
---- *     list = istable,
---- *     func = isfunction,
---- *     multiType = function(self) return isstring(self) or istable(self) end,
+--- *     schemaStr = "string",
+--- *     schemaFunc = "function",
+--- *     schemaMultiType = { "string", "table" }
+--- *     schemaCustomCheck = function(self) return isstring(self) or istable(self) end,
 --- * }
 --- @param schema table @The table validation schema.
 --- @param validateTable table @The table to validate.
 --- @param validationString table @String what table we are validating for ErrorNoHalt.
 --- @return boolean @Whether the validation succeeded.
 function TLL.CheckTableValidation(schema, validateTable, validationString)
-    if !istable(schema) then
-        ErrorNoHalt("Schema must be a table!")
+    local stackTrace = debug.traceback()
+    local stackTraceFind = stackTrace:find("in main chunk")
+    local stackTraceStr = string.Explode("\n\t", stackTrace:sub(1, stackTraceFind - 3))
+    stackTraceStr = stackTraceStr[#stackTraceStr]
+
+    local errorText
+
+    if type(schema) != "table" then
+        errorText = "[TLL Error] Schema must be a table! [" .. stackTraceStr .. "]\n"
+    end
+    if table.Count(schema) == 0 then
+        errorText = "[TLL Error] Schema must not be empty! [" .. stackTraceStr .. "]\n"
+    end
+    if type(validateTable) != "table" then
+        errorText = "[TLL Error] Table to validate against schema is not a table! [" .. stackTraceStr .. "]\n"
+    end
+    if table.Count(validateTable) == 0 then
+        errorText = "[TLL Error] Table to validate must not be empty! [" .. stackTraceStr .. "]\n"
+    end
+
+    if errorText then
+        ErrorNoHalt(errorText)
         return false
     end
 
-    if !istable(validateTable) then
-        ErrorNoHalt("Table to validate against schema is not a table!")
-        return false
-    end
-
-    local errorText = "Incorrect " .. (validationString or "table") .. "! Invalid elements:\n"
     local isValid = true
+    errorText = ("[TLL Error] Incorrect %s! [%s]\nInvalid elements:\n"):format(validationString or "table", stackTraceStr)
 
-    for k in next, validateTable do
-        if !schema[k](validateTable[k]) then
-            errorText = errorText .. (" - %s\n"):format(k)
+    for k, v in next, validateTable do
+        local schemaValue = schema[k]
+        local schemaValueType = type(schemaValue)
+        local schemaValueIsFunc = schemaValueType == "function"
+
+        local schemaTypeIsValid = false
+
+        if schemaValueType == "table" then
+            if #schemaValue == 0 then
+                ErrorNoHalt("[TLL Error] '" .. k .. "' types not found in schema! [" .. stackTraceStr .. "]\n")
+                return false
+            end
+
+            for i = 1, #schemaValue do
+                local value = schemaValue[i]
+                local schemaType = TLL.Types[value]
+
+                if !schemaType then
+                    ErrorNoHalt("[TLL Error] Invalid type of '" .. k .. "' in schema! '" .. value .. "' does not exist! [" .. stackTraceStr .. "]\n")
+                    return false
+                end
+
+                if type(v) == schemaType then
+                    schemaTypeIsValid = true
+                end
+            end
+        elseif schemaValueType == "string" then
+            local schemaType = TLL.Types[schemaValue]
+            if !schemaType then
+                ErrorNoHalt("[TLL Error] Invalid type of '" .. k .. "' in schema! '" .. schemaValue .. "' does not exist! [" .. stackTraceStr .. "]\n")
+                return false
+            end
+
+            schemaTypeIsValid = type(v) == schemaType
+        end
+
+        if !schemaTypeIsValid and !(schemaValueIsFunc and schemaValue(validateTable[k])) then
+            local schemaType = schemaValueType == "table" and "(must be a " .. TLL.TableToString(schemaValue) .. ")"
+                                    or schemaValueType == "function" and ""
+                                    or "(must be a " .. schemaValue .. ")"
+
+            errorText = errorText .. ("\t- %s %s\n"):format(k, schemaType)
             isValid = false
         end
     end

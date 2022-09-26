@@ -2,15 +2,15 @@ Antagonist.Roles = Antagonist.Roles or {}
 Antagonist.Roles.List = Antagonist.Roles.List or {}
 
 local roleSchema = {
-    name = isstring,
+    name = "string",
     color = IsColor,
-    model = function(self) return isstring(self) or istable(self) end,
-    description = isstring,
-    weapons = istable,
-    max = isnumber,
-    salary = isnumber,
-    customCheck = isfunction,
-    customCheckFailMsg = function(self) return isstring(self) or isfunction(self) end,
+    model = { "string", "table" },
+    description = "string",
+    weapons = "table",
+    max = "number",
+    salary = "number",
+    customCheck = "function",
+    customCheckFailMsg = { "string", "function" },
 }
 
 function Antagonist.CreateRole(role)
