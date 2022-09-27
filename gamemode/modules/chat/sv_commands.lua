@@ -4,12 +4,12 @@ local function meChatCommand(ply, args, text)
         return
     end
 
-    Antagonist.TalkToRange(Antagonist.Config.MeDistance, ply:Nick() .. " " .. text, ply)
+    Antagonist.TalkToRange(GAMEMODE.Config.MeDistance, ply:Nick() .. " " .. text, ply)
 end
 Antagonist.RegisterChatCommand("me", meChatCommand)
 
 local function oocChatCommand(ply, args, text)
-    if !Antagonist.Config.OOC then
+    if !GAMEMODE.Config.OOC then
         Antagonist.Notify(ply, NOTIFY_ERROR, 3, Antagonist.GetPhrase(ply.Language, "disabled_ooc"))
         return
     end
@@ -35,6 +35,6 @@ local function loocChatCommand(ply, args, text)
         return
     end
 
-    Antagonist.TalkToRange(Antagonist.Config.TalkDistance, "(Local OOC) " .. ply:Nick(), ply, text)
+    Antagonist.TalkToRange(GAMEMODE.Config.TalkDistance, "(Local OOC) " .. ply:Nick(), ply, text)
 end
 Antagonist.RegisterChatCommand("looc", loocChatCommand)

@@ -31,24 +31,6 @@ TLL.Types = {
     ["function"] = "function",
 }
 
---- Returns a string of table elements separated by commas.
---- @param tbl table @The table to convert to string.
---- @return string
-function TLL.TableToString(tbl)
-    local sortedTable = tbl
-    table.sort(sortedTable)
-
-    local str = ""
-    local sortedTableLength = #sortedTable
-
-    for i = 1, sortedTableLength do
-        local value = sortedTable[i]
-        str = str .. value .. (i == sortedTableLength and "" or ", ")
-    end
-
-    return str
-end
-
 --- Validates a table against a schema.
 --- Schema example:
 --- * {
@@ -138,4 +120,33 @@ function TLL.CheckTableValidation(schema, validateTable, validationString)
 
     if !isValid then ErrorNoHalt(errorText) end
     return isValid
+end
+
+--- Removes all entities found by class
+--- @param class string @Entities class name
+function TLL.RemoveAllByClass(class)
+    local entities = ents.FindByClass(class)
+
+    for i = 1, #entities do
+        local ent = entities[i]
+        ent:Remove()
+    end
+end
+
+--- Returns a string of table elements separated by commas.
+--- @param tbl table @The table to convert to string.
+--- @return string
+function TLL.TableToString(tbl)
+    local sortedTable = tbl
+    table.sort(sortedTable)
+
+    local str = ""
+    local sortedTableLength = #sortedTable
+
+    for i = 1, sortedTableLength do
+        local value = sortedTable[i]
+        str = str .. value .. (i == sortedTableLength and "" or ", ")
+    end
+
+    return str
 end

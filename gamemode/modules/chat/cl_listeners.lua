@@ -8,7 +8,7 @@ local textColorGreen = Color(50, 250, 50)
 local function getChatRecipients()
     local localPlayer = LocalPlayer()
     local eyePos = localPlayer:EyePos()
-    local range = Antagonist.Config.TalkDistance
+    local range = GAMEMODE.Config.TalkDistance
     local rangeSqr = range * range
 
     recipients = {}

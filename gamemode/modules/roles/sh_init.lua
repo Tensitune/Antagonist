@@ -37,20 +37,3 @@ end
 function Antagonist.GetRole(index)
     return Antagonist.Roles.List[index]
 end
-
-local meta = FindMetaTable("Player")
-function meta:ChangeRole(index)
-    local role = Antagonist.Roles.List[i]
-    if !role then return end
-
-    if role.customCheck and !role.customCheck(self) then
-        local message = isfunction(role.customCheckFailMsg) and role.customCheckFailMsg(self, role)
-                            or role.customCheckFailMsg
-                            or Antagonist.GetPhrase(self.Language, "unable_to_change_role", role.name)
-
-        Antagonist.Notify(self, NOTIFY_ERROR, 5, message)
-        return false
-    end
-
-    return true
-end

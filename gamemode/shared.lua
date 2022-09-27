@@ -6,9 +6,9 @@ DeriveGamemode("sandbox")
 DEFINE_BASECLASS("gamemode_sandbox")
 
 GM.Sandbox = BaseClass
+GM.Config = GM.Config or {}
 
 Antagonist = Antagonist or {}
-Antagonist.Config = Antagonist.Config or {}
 
 if SERVER then
     AddCSLuaFile("libraries/sh_cami.lua")

@@ -1,10 +1,10 @@
 local mathFloor = math.floor
 
-local voice3D = Antagonist.Config.Voice3D
-local voiceRadius = Antagonist.Config.VoiceRadius
-local dynamicVoice = Antagonist.Config.DynamicVoice
-local deadVoice = Antagonist.Config.DeadVoice
-local voiceDistance = Antagonist.Config.VoiceDistance * Antagonist.Config.VoiceDistance
+local voice3D = GM.Config.Voice3D
+local voiceRadius = GM.Config.VoiceRadius
+local dynamicVoice = GM.Config.DynamicVoice
+local deadVoice = GM.Config.DeadVoice
+local voiceDistance = GM.Config.VoiceDistance * GM.Config.VoiceDistance
 
 local canHearPlayers = {}
 local chPlayers = player.GetHumans()
@@ -30,8 +30,8 @@ function GM:InitPostEntity()
     game.ConsoleCommand("sv_sticktoground 0\n")
     game.ConsoleCommand("sv_airaccelerate 1000\n")
     -- sv_alltalk must be 0
-    -- Note, everyone will STILL hear everyone UNLESS Antagonist.Config.voiceradius is set to true
-    -- This will fix the Antagonist.Config.VoiceRadius not working
+    -- Note, everyone will STILL hear everyone UNLESS GM.Config.voiceradius is set to true
+    -- This will fix the GM.Config.VoiceRadius not working
     game.ConsoleCommand("sv_alltalk 0\n")
 end
 
@@ -51,7 +51,7 @@ function GM:PlayerInitialSpawn(ply)
         if !IsValid(ply) then return end
 
         local steamid = ply:SteamID()
-        local group = Antagonist.Config.DefaultPlayerGroups[steamid]
+        local group = self.Config.DefaultPlayerGroups[steamid]
 
         if group then
             ply:SetUserGroup(group)
@@ -65,7 +65,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
     local weapon = ply:GetActiveWeapon()
     local canDrop = hook.Call("CanDropWeapon", self, weapon)
 
-    if Antagonist.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
+    if self.Config.DropWeaponDeath and weapon:IsValid() and canDrop then
         ply:DropWeapon(weapon)
     end
 
@@ -78,14 +78,14 @@ function GM:PlayerDeath(ply, weapon, attacker)
 end
 
 function GM:PlayerSpawnProp(ply, model)
-    return Antagonist.Config.PropSpawning and self.Sandbox.PlayerSpawnProp(self, ply, model)
+    return self.Config.PropSpawning and self.Sandbox.PlayerSpawnProp(self, ply, model)
 end
 
 function GM:PlayerSpawnedProp(ply, model, ent)
     self.Sandbox.PlayerSpawnedProp(self, ply, model, ent)
     ent.SID = ply.SID
 
-    if Antagonist.Config.PropCrafting then
+    if self.Config.PropCrafting then
         Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "not_enough_resources"))
 
         SafeRemoveEntity(ent)
@@ -159,7 +159,7 @@ local function isInRoom(listenerShootPos, talkerShootPos, talker)
 end
 
 local grid -- Grid based position check
-local gridSize = Antagonist.Config.VoiceDistance -- Grid cell size is equal to the size of the radius of player talking
+local gridSize = GM.Config.VoiceDistance -- Grid cell size is equal to the size of the radius of player talking
 -- Translate player to grid coordinates. The first table maps players to x coordinates, the second table maps players to y coordinates.
 local playerToGrid = {{}, {}}
 
@@ -273,11 +273,11 @@ function GM:PlayerCanHearPlayersVoice(listener, talker)
 end
 
 function GM:PlayerShouldTaunt(ply, actid)
-    return Antagonist.Config.AllowActs
+    return self.Config.AllowActs
 end
 
 function GM:PlayerSpray()
-    return !Antagonist.Config.AllowSprays
+    return !self.Config.AllowSprays
 end
 
 function GM:CanTool(ply, trace, mode)
@@ -312,13 +312,13 @@ function GM:CanDropWeapon(weapon)
     if !IsValid(weapon) then return false end
     local class = string.lower(weapon:GetClass())
 
-    if Antagonist.Config.DisallowDrop[class] then return false end
+    if self.Config.DisallowDrop[class] then return false end
 
     return true
 end
 
 function GM:CanProperty(ply, property, ent)
-    if Antagonist.Config.AllowedProperties[property] then
+    if self.Config.AllowedProperties[property] then
         return true
     end
 
@@ -330,9 +330,9 @@ function GM:CanProperty(ply, property, ent)
 end
 
 function GM:GetFallDamage(ply, fallSpeed)
-    if GetConVar("mp_falldamage"):GetBool() or Antagonist.Config.RealisticFallDamage then
-        return Antagonist.Config.FallDamageDamper and (fallSpeed / Antagonist.Config.FallDamageDamper) or (fallSpeed / 15)
+    if GetConVar("mp_falldamage"):GetBool() or self.Config.RealisticFallDamage then
+        return self.Config.FallDamageDamper and (fallSpeed / self.Config.FallDamageDamper) or (fallSpeed / 15)
     else
-        return Antagonist.Config.FallDamageAmount or 10
+        return self.Config.FallDamageAmount or 10
     end
 end

@@ -52,7 +52,7 @@ function GM:CanUseChatCommand(ply, commandName)
 end
 
 function GM:PlayerSay(ply, text, teamChat)
-    if string.sub(text, 1, 1) == Antagonist.Config.ChatCommandPrefix then
+    if string.sub(text, 1, 1) == self.Config.ChatCommandPrefix then
         local commandStuff = string.Explode(" ", text)
         local commandName = string.sub(commandStuff[1], 2)
 
@@ -74,6 +74,6 @@ function GM:PlayerSay(ply, text, teamChat)
         end
     end
 
-    Antagonist.TalkToRange(Antagonist.Config.TalkDistance, nil, ply, text)
+    Antagonist.TalkToRange(self.Config.TalkDistance, nil, ply, text)
     return ""
 end
