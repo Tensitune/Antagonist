@@ -1,7 +1,8 @@
 local gmodLanguage = GetConVar("gmod_language"):GetString()
 
-hook.Add("InitPostEntity", "Antagonist.Language", function()
+local function agLanguage()
     net.Start("Antagonist.Language")
     net.WriteString(gmodLanguage)
     net.SendToServer()
-end)
+end
+hook.Add("InitPostEntity", "Antagonist.Language", agLanguage)

@@ -7,10 +7,11 @@ function Antagonist.Notify(notificationType, length, message)
     surface.PlaySound(sound)
 end
 
-net.Receive("Antagonist.Notification", function()
+local function agNotification()
     local notificationType = net.ReadInt(3)
     local length = net.ReadInt(6)
     local message = net.ReadString()
 
     Antagonist.Notify(notificationType, length, message)
-end)
+end
+net.Receive("Antagonist.Notification", agNotification)

@@ -8,12 +8,14 @@ local files = file.Find(root .. "*", "LUA")
 
 function Antagonist.AddTranslation(name, translation)
     translations[name] = translation
-    table.insert(Antagonist.Languages, name)
+
+    if table.HasValue(Antagonist.Languages, name) then return end
+    Antagonist.Languages[#Antagonist.Languages + 1] = name
 end
 
 function Antagonist.GetPhrase(lang, name, ...)
     local translation = translations[lang] or translations[gmodLanguage] or translations.en
-    return translation[name] and string.format(translation[name], ...) or ""
+    return translation[name] and translation[name]:format(...) or ""
 end
 
 for _, fileName in next, files do

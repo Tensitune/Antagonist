@@ -1,7 +1,7 @@
 function GM:OnPlayerChat()
 end
 
-local function addToChat()
+local function agChat()
     local ply = net.ReadEntity()
     if !IsValid(ply) then return end
 
@@ -32,4 +32,4 @@ local function addToChat()
 
     chat.PlaySound()
 end
-net.Receive("Antagonist.Chat", addToChat)
+net.Receive("Antagonist.Chat", agChat)

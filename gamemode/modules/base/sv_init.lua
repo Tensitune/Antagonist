@@ -11,8 +11,7 @@ local chPlayers = player.GetHumans()
 
 -- Recreate canHearPlayers after Lua Refresh
 for i = 1, #chPlayers do
-    local ply = chPlayers[i]
-    canHearPlayers[ply] = {}
+    canHearPlayers[chPlayers[i].ID] = {}
 end
 
 function GM:Initialize()
@@ -36,16 +35,18 @@ function GM:InitPostEntity()
 end
 
 function GM:PlayerDisconnected(ply)
-    canHearPlayers[ply] = nil -- Clear to avoid memory leaks
+    canHearPlayers[ply.ID] = nil -- Clear to avoid memory leaks
 end
 
 function GM:PlayerInitialSpawn(ply)
     self.Sandbox.PlayerInitialSpawn(self, ply)
 
-    ply:SetTeam(Antagonist.Roles.Default)
+    ply.ID = ply:UserID()
+
+    ply:ChangeRole(Antagonist.Roles.Default)
 
     -- Initialize canHearPlayers for player (used for voice radius check)
-    canHearPlayers[ply] = {}
+    canHearPlayers[ply.ID] = {}
 
     timer.Simple(1, function()
         if !IsValid(ply) then return end
@@ -172,18 +173,12 @@ timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
     playerToGrid[2] = {}
     grid = {}
 
-    local playerPos = {}
-    local eyePos = {}
-
     local players = player.GetHumans()
 
     -- Get the grid position of every player O(N)
     for i = 1, #players do
         local ply = players[i]
-
         local pos = ply:GetPos()
-        playerPos[ply] = pos
-        eyePos[ply] = ply:EyePos()
 
         local x = mathFloor(pos.x / gridSize)
         local y = mathFloor(pos.y / gridSize)
@@ -191,14 +186,14 @@ timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
         local row = grid[x] or {}
         local cell = row[y] or {}
 
-        table.insert(cell, ply)
+        cell[#cell + 1] = ply
         row[y] = cell
         grid[x] = row
 
-        playerToGrid[1][ply] = x
-        playerToGrid[2][ply] = y
+        playerToGrid[1][ply.ID] = x
+        playerToGrid[2][ply.ID] = y
 
-        canHearPlayers[ply] = {} -- Initialize output variable
+        canHearPlayers[ply.ID] = {} -- Initialize output variable
     end
 
     -- Check all neighbouring cells for every player.
@@ -206,10 +201,11 @@ timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
     for i = 1, #players do
         local ply = players[i]
 
-        local gridX = playerToGrid[1][ply]
-        local gridY = playerToGrid[2][ply]
-        local tempPlayerPos = playerPos[ply]
-        local tempEyePos = eyePos[ply]
+        local gridX = playerToGrid[1][ply.ID]
+        local gridY = playerToGrid[2][ply.ID]
+        local pos = ply:GetPos()
+        local eyePos = ply:EyePos()
+        local alive = ply:Alive()
 
         for j = 0, 3 do
             local vOffset = 1 - ((j >= 3) and 1 or 0)
@@ -224,15 +220,15 @@ timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
             if !cell then continue end
 
             for k = 1, #cell do
-                local cellPlayer = cell[k]
+                local cellPly = cell[k]
 
                 -- VoiceRadius is on and the two are within hearing distance
                 -- DynamicVoice is on and players are in the same room
-                local canTalk = tempPlayerPos:DistToSqr(playerPos[cellPlayer]) < voiceDistance
-                                    and (!dynamicVoice or isInRoom(tempEyePos, eyePos[cellPlayer], cellPlayer))
+                local canTalk = pos:DistToSqr(cellPly:GetPos()) < voiceDistance
+                                    and (!dynamicVoice or isInRoom(eyePos, cellPly:EyePos(), cellPly))
 
-                canHearPlayers[ply][cellPlayer] = canTalk and (deadVoice or cellPlayer:Alive())
-                canHearPlayers[cellPlayer][ply] = canTalk and (deadVoice or ply:Alive()) -- Take advantage of the symmetry
+                canHearPlayers[ply.ID][cellPly.ID] = canTalk and (deadVoice or cellPly:Alive())
+                canHearPlayers[cellPly.ID][ply.ID] = canTalk and (deadVoice or alive) -- Take advantage of the symmetry
             end
         end
     end
@@ -247,21 +243,17 @@ timer.Create("Antagonist.CanHearPlayersVoice", 0.3, 0, function()
             local cell = row[j]
             if !cell then continue end
 
-            local cellLength = #cell
-            for k = 1, cellLength do
+            for k = 2, #cell do
+                local prevPly = cell[k - 1]
                 local ply = cell[k]
 
-                for l = k + 1, cellLength do
-                    local nextPlayer = cell[l]
+                -- VoiceRadius is on and the two are within hearing distance
+                -- DynamicVoice is on and players are in the same room
+                local canTalk = prevPly:GetPos():DistToSqr(ply:GetPos()) < voiceDistance
+                                    and (!dynamicVoice or isInRoom(prevPly:EyePos(), ply:EyePos(), ply))
 
-                    -- VoiceRadius is on and the two are within hearing distance
-                    -- DynamicVoice is on and players are in the same room
-                    local canTalk = playerPos[ply]:DistToSqr(playerPos[nextPlayer]) < voiceDistance
-                                        and (!dynamicVoice or isInRoom(eyePos[ply], eyePos[nextPlayer], nextPlayer))
-
-                    canHearPlayers[ply][nextPlayer] = canTalk and (deadVoice or nextPlayer:Alive())
-                    canHearPlayers[nextPlayer][ply] = canTalk and (deadVoice or ply:Alive()) -- Take advantage of the symmetry
-                end
+                canHearPlayers[prevPly.ID][ply.ID] = canTalk and (deadVoice or ply:Alive())
+                canHearPlayers[ply.ID][prevPly.ID] = canTalk and (deadVoice or prevPly:Alive()) -- Take advantage of the symmetry
             end
         end
     end
@@ -269,7 +261,7 @@ end)
 
 function GM:PlayerCanHearPlayersVoice(listener, talker)
     if !deadVoice and !talker:Alive() then return false end
-    return !voiceRadius or canHearPlayers[listener][talker] == true, voice3D
+    return !voiceRadius or canHearPlayers[listener.ID][talker.ID] == true, voice3D
 end
 
 function GM:PlayerShouldTaunt(ply, actid)
@@ -310,21 +302,16 @@ end
 
 function GM:CanDropWeapon(weapon)
     if !IsValid(weapon) then return false end
-    local class = string.lower(weapon:GetClass())
 
+    local class = string.lower(weapon:GetClass())
     if self.Config.DisallowDrop[class] then return false end
 
     return true
 end
 
 function GM:CanProperty(ply, property, ent)
-    if self.Config.AllowedProperties[property] then
-        return true
-    end
-
-    if ply:IsSuperAdmin() then
-        return true
-    end
+    if self.Config.AllowedProperties[property] then return true end
+    if ply:IsSuperAdmin() then return true end
 
     return false
 end

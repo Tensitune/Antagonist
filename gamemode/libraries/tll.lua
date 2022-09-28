@@ -45,12 +45,12 @@ TLL.Types = {
 --- @return boolean @Whether the validation succeeded.
 function TLL.CheckTableValidation(schema, validateTable, validationString)
     local stackTrace = debug.traceback()
-    local stackTraceFind = stackTrace:find("in main chunk")
-    local stackTraceStr = string.Explode("\n\t", stackTrace:sub(1, stackTraceFind - 3))
+
+    local stackTraceStr = stackTrace:find("in main chunk")
+    stackTraceStr = string.Explode("\n\t", stackTrace:sub(1, stackTraceStr - 3))
     stackTraceStr = stackTraceStr[#stackTraceStr]
 
     local errorText
-
     if type(schema) != "table" then
         errorText = "[TLL Error] Schema must be a table! [" .. stackTraceStr .. "]\n"
     end
@@ -128,24 +128,23 @@ function TLL.RemoveAllByClass(class)
     local entities = ents.FindByClass(class)
 
     for i = 1, #entities do
-        local ent = entities[i]
-        ent:Remove()
+        entities[i]:Remove()
     end
 end
 
 --- Returns a string of table elements separated by commas.
 --- @param tbl table @The table to convert to string.
+--- @param sort bool @Whether to sort table.
 --- @return string
-function TLL.TableToString(tbl)
-    local sortedTable = tbl
-    table.sort(sortedTable)
+function TLL.TableToString(tbl, sort)
+    local tempTbl = tbl
+    if sort then table.sort(tempTbl) end
 
     local str = ""
-    local sortedTableLength = #sortedTable
+    local tempTblLength = #tempTbl
 
-    for i = 1, sortedTableLength do
-        local value = sortedTable[i]
-        str = str .. value .. (i == sortedTableLength and "" or ", ")
+    for i = 1, tempTblLength do
+        str = str .. tempTbl[i] .. (i == tempTblLength and "" or ", ")
     end
 
     return str

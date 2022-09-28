@@ -1,11 +1,11 @@
 function Antagonist.GetNickSortedPlayers()
     local players = player.GetAll()
-    table.sort(players, function(a,b) return a:Nick() < b:Nick() end)
+    table.sort(players, function(a, b) return a:Nick() < b:Nick() end)
 
     return players
 end
 
-local stringSub, tableInsert = string.sub, table.insert
+local stringSub = string.sub
 function Antagonist.ExplodeArgs(args)
     local from, to, diff = 1, 0, 0
     local inQuotes, wasQuotes = false, false
@@ -24,7 +24,7 @@ function Antagonist.ExplodeArgs(args)
             diff = wasQuotes and 1 or 0
             wasQuotes = false
 
-            tableInsert(args, stringSub(arg, from + diff, to - 1 - diff))
+            args[#args + 1] = stringSub(arg, from + diff, to - 1 - diff)
             from = to + 1
         end
     end
@@ -32,7 +32,7 @@ function Antagonist.ExplodeArgs(args)
     diff = wasQuotes and 1 or 0
 
     if from != to + 1 then
-        tableInsert(args, stringSub(arg, from + diff, to + 1 - bit.lshift(diff, 1)))
+        args[#args + 1] = stringSub(arg, from + diff, to + 1 - bit.lshift(diff, 1))
     end
 
     return args

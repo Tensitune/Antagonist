@@ -1,13 +1,14 @@
 util.AddNetworkString("Antagonist.Roles")
 
-net.Receive("Antagonist.Roles", function(_, ply)
+local function agRoles(_, ply)
     local roleIndex = net.ReadInt(9)
     local canChange = gamemode.Call("CanChangeRole", ply, roleIndex)
 
     if !canChange then return end
 
     ply:ChangeRole(roleIndex)
-end)
+end
+net.Receive("Antagonist.Roles", agRoles)
 
 function GM:CanChangeRole(ply, index)
     local role = Antagonist.Roles.List[index]

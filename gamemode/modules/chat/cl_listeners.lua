@@ -19,7 +19,7 @@ local function getChatRecipients()
         if !IsValid(ply) or ply == localPlayer or ply:GetNoDraw() then continue end
 
         if ply:EyePos():DistToSqr(eyePos) <= rangeSqr then
-            table.insert(recipients, ply)
+            recipients[#recipients + 1] = ply
         end
     end
 
@@ -34,28 +34,26 @@ local function drawChatRecipients()
 
     y = y - fontHeight - 6
 
-    local playerCount = player.GetCount()
     local recipientsCount = #recipients
 
     if recipientsCount == 0 then
         draw.WordBox(4, x, y, Antagonist.GetPhrase(nil, "hear_noone"), tag, backgroundColor, textColorRed, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         return
-    elseif recipientsCount == playerCount - 1 then
+    elseif recipientsCount == player.GetCount() - 1 then
         draw.WordBox(4, x, y, Antagonist.GetPhrase(nil, "hear_everyone"), tag, backgroundColor, textColorGreen, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         return
     end
 
-    local wordBoxY = y - recipientsCount * (fontHeight + 6)
-    draw.WordBox(4, x, wordBoxY, Antagonist.GetPhrase(nil, "hear_certain_persons"), tag, backgroundColor, textColorGreen, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+    draw.WordBox(
+        4, x, y - recipientsCount * (fontHeight + 6), Antagonist.GetPhrase(nil, "hear_certain_persons"),
+        tag, backgroundColor, textColorGreen, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER
+    )
 
     for i = 1, recipientsCount do
         local recipient = recipients[i]
         if !IsValid(recipient) then continue end
 
-        local nick = recipient:Nick()
-        local recipientWordBoxY = y - (i - 1) * (fontHeight + 6)
-
-        draw.WordBox(4, x, recipientWordBoxY, nick, tag, backgroundColor, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        draw.WordBox(4, x, y - (i - 1) * (fontHeight + 6), recipient:Nick(), tag, backgroundColor, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
     end
 end
 

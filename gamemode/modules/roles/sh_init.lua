@@ -19,7 +19,7 @@ function Antagonist.CreateRole(role)
 
     local roleIndex = #Antagonist.Roles.List + 1
 
-    table.insert(Antagonist.Roles.List, role)
+    Antagonist.Roles.List[roleIndex] = role
     team.SetUp(roleIndex, role.name, role.color)
 
     if istable(role.model) then

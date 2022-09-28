@@ -45,7 +45,7 @@ function Antagonist.TalkToRange(range, prefix, sender, message)
         if !IsValid(recipient) then continue end
 
         if recipient == sender or recipient:EyePos():DistToSqr(eyePos) <= rangeSqr then
-            table.insert(filter, recipient)
+            filter[#filter + 1] = recipient
         end
     end
 
