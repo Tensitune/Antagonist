@@ -4,7 +4,7 @@ Antagonist.AddTranslation("ru", {
 
     cant_afford = "Вы не можете себе позволить это.",
     cant_use_cmd = "Вы не можете использовать эту команду!",
-    cmd_not_found = "Команда не найдена!",
+    cmd_not_found = "Такой команды не существует!",
     disabled_ooc = "Глобальный OOC выключен!",
     invalid_args = "Недопустимые аргументы!",
     not_enough_resources = "У вас недостаточно ресурсов для крафта.",
@@ -14,15 +14,31 @@ Antagonist.AddTranslation("ru", {
     hear_certain_persons = "Игроки, которые вас слышат:",
     hear_everyone = "Вас слышат все!",
     hear_noone = "Вас никто не слышит!",
+    yell_listeners = "(Крик)",
+    whisper_listeners = "(Шёпот)",
+    me_listeners = "(Действие)",
+    says = "говорит",
+    asks = "спрашивает",
+    exclaims = "восклицает",
+    yells = "кричит",
+    whispers = "шепчет",
+
+    -- Actions
+    action_flip = "подбросил монетку и получил %s",
 
     -- Commands
+    command_yell = "Крик в чате.",
+    command_whisper = "Шёпот в чате.",
     command_me = "Чат для описания своих рп действий.",
     command_ooc = "Глобальный нон-рп чат.",
     command_looc = "Локальный нон-рп чат.",
+    command_flip = "Подбросить монетку.",
 
     -- Misc
     admin = "администратора",
     sadmin = "супер администратора",
+    coin_heads = "Орёл",
+    coin_tails = "Решка",
 
     -- Civilian Roles
     role_civilian = "Персонал",

@@ -36,6 +36,18 @@ end
 Chat commands
 ---------------------------------------------------------------------------]]
 Antagonist.DeclareChatCommand({
+    name = "y",
+    description = Antagonist.GetPhrase(nil, "command_yell"),
+    delay = 1,
+})
+
+Antagonist.DeclareChatCommand({
+    name = "w",
+    description = Antagonist.GetPhrase(nil, "command_whisper"),
+    delay = 1,
+})
+
+Antagonist.DeclareChatCommand({
     name = "me",
     description = Antagonist.GetPhrase(nil, "command_me"),
     delay = 1,
@@ -50,5 +62,11 @@ Antagonist.DeclareChatCommand({
 Antagonist.DeclareChatCommand({
     name = "looc",
     description = Antagonist.GetPhrase(nil, "command_looc"),
+    delay = 1,
+})
+
+Antagonist.DeclareChatCommand({
+    name = "flip",
+    description = Antagonist.GetPhrase(nil, "command_flip"),
     delay = 1,
 })

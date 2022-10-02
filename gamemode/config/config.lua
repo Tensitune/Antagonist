@@ -42,6 +42,8 @@ Distance is in source units (similar to inches)
 ---------------------------------------------------------------------------]]
 GM.Config.VoiceDistance = 550
 GM.Config.TalkDistance = 250
+GM.Config.YellDistance = 550
+GM.Config.WhisperDistance = 90
 GM.Config.MeDistance = 250
 
 --[[---------------------------------------------------------------------------

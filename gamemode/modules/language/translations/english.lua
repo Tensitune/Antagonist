@@ -23,15 +23,31 @@ Antagonist.AddTranslation("en", {
     hear_certain_persons = "Players who can hear you:",
     hear_everyone = "Everyone can hear you!",
     hear_noone = "No-one can hear you!",
+    yell_listeners = "(Yell)",
+    whisper_listeners = "(Whisper)",
+    me_listeners = "(Action)",
+    says = "says",
+    asks = "asks",
+    exclaims = "exclaims",
+    yells = "yells",
+    whispers = "whispers",
+
+    -- Actions
+    action_flip = "flipped the coin and got %s",
 
     -- Commands
+    command_yell = "Yell in chat.",
+    command_whisper = "Whisper in chat.",
     command_me = "Chat to describe your roleplay actions.",
     command_ooc = "Out of character non-roleplay global chat.",
     command_looc = "Out of character non-roleplay local chat.",
+    command_flip = "Flip the coin.",
 
     -- Misc
     admin = "admin",
     sadmin = "superadmin",
+    coin_heads = "Heads",
+    coin_tails = "Tails",
 
     -- Civilian Roles
     role_civilian = "Personnel",

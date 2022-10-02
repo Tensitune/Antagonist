@@ -27,12 +27,12 @@ function GM:CanUseChatCommand(ply, commandName)
 
     if !cmd then
         Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "cmd_not_found"))
-        return false
+        return false, nil
     end
 
     if cmd.condition != nil and !condition then
         Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "cant_use_cmd"))
-        return false
+        return false, nil
     end
 
     if cmd.restriction then
@@ -44,36 +44,41 @@ function GM:CanUseChatCommand(ply, commandName)
 
         if !canUseCommand then
             Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "no_privilege"))
-            return false
+            return false, nil
         end
     end
 
-    return true
+    return true, cmd
 end
 
 function GM:PlayerSay(ply, text, teamChat)
+    text = string.Trim(text)
+
     if string.sub(text, 1, 1) == self.Config.ChatCommandPrefix then
         local commandStuff = string.Explode(" ", text)
         local commandName = string.sub(commandStuff[1], 2)
 
-        local cmd = Antagonist.GetChatCommand(commandName)
-        if cmd then
-            if cmd.delay and ply.CommandDelays[cmd.name] and ply.CommandDelays[cmd.name] > CurTime() - cmd.delay then
-                return ""
-            elseif cmd.delay then
-                ply.CommandDelays[cmd.name] = CurTime()
-            end
+        local canUse, cmd = self:CanUseChatCommand(ply, commandName)
+        if !canUse then return "" end
 
-            local args = string.sub(text, #cmd.name + 3)
-            local cbText = args
-
-            args = cmd.arguments and Antagonist.ExplodeArgs(args) or args
-
-            cmd.callback(ply, args, cbText)
+        if cmd.delay and ply.CommandDelays[cmd.name] and ply.CommandDelays[cmd.name] > CurTime() - cmd.delay then
             return ""
+        elseif cmd.delay then
+            ply.CommandDelays[cmd.name] = CurTime()
         end
+
+        local args = string.sub(text, #cmd.name + 3)
+        local cbText = args
+        args = cmd.arguments and Antagonist.ExplodeArgs(args) or args
+
+        cmd.callback(ply, args, cbText)
+        return ""
     end
 
-    Antagonist.TalkToRange(self.Config.TalkDistance, nil, ply, text)
+    local chatTypeStr = text:Right(1) == "?" and Antagonist.GetPhrase(ply.Language, "asks")
+                        or text:Right(1) == "!" and Antagonist.GetPhrase(ply.Language, "exclaims")
+                            or Antagonist.GetPhrase(ply.Language, "says")
+
+    Antagonist.TalkToRange(self.Config.TalkDistance, ply, nil, (" %s, \"%s\""):format(chatTypeStr, text))
     return ""
 end

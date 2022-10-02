@@ -28,7 +28,7 @@ local function sendChatMessage(sender, recipient, prefix, message)
     net.Send(recipient)
 end
 
-function Antagonist.TalkToRange(range, prefix, sender, message)
+function Antagonist.TalkToRange(range, sender, prefix, message)
     if !IsValid(sender) then return end
 
     if !prefix then prefix = "" end
@@ -52,7 +52,7 @@ function Antagonist.TalkToRange(range, prefix, sender, message)
     sendChatMessage(sender, filter, prefix, message)
 end
 
-function Antagonist.TalkToPerson(prefix, sender, recipient, message)
+function Antagonist.TalkToPerson(sender, recipient, prefix, message)
     if !IsValid(sender) or !IsValid(recipient) then return end
 
     if !prefix then prefix = "" end

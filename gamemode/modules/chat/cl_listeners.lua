@@ -5,10 +5,16 @@ local backgroundColor = Color(0, 0, 0, 150)
 local textColorRed = Color(250, 50, 50)
 local textColorGreen = Color(50, 250, 50)
 
+local chatType = 0 -- 0 - Talk, 1 - Yell, 2 - Whisper, 3 - Me
+
 local function getChatRecipients()
     local localPlayer = LocalPlayer()
     local eyePos = localPlayer:EyePos()
-    local range = GAMEMODE.Config.TalkDistance
+
+    local range = chatType == 1 and GAMEMODE.Config.YellDistance
+                    or chatType == 2 and GAMEMODE.Config.WhisperDistance
+                    or chatType == 3 and GAMEMODE.Config.MeDistance
+                    or GAMEMODE.Config.TalkDistance
     local rangeSqr = range * range
 
     recipients = {}
@@ -35,17 +41,27 @@ local function drawChatRecipients()
     y = y - fontHeight - 6
 
     local recipientsCount = #recipients
+    local chatTypeStr = chatType == 1 and " " .. Antagonist.GetPhrase(nil, "yell_listeners")
+                            or chatType == 2 and " " .. Antagonist.GetPhrase(nil, "whisper_listeners")
+                            or chatType == 3 and " " .. Antagonist.GetPhrase(nil, "me_listeners")
+                            or ""
 
     if recipientsCount == 0 then
-        draw.WordBox(4, x, y, Antagonist.GetPhrase(nil, "hear_noone"), tag, backgroundColor, textColorRed, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        draw.WordBox(
+            4, x, y, Antagonist.GetPhrase(nil, "hear_noone") .. chatTypeStr,
+            tag, backgroundColor, textColorRed, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER
+        )
         return
     elseif recipientsCount == player.GetCount() - 1 then
-        draw.WordBox(4, x, y, Antagonist.GetPhrase(nil, "hear_everyone"), tag, backgroundColor, textColorGreen, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        draw.WordBox(
+            4, x, y, Antagonist.GetPhrase(nil, "hear_everyone") .. chatTypeStr,
+            tag, backgroundColor, textColorGreen, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER
+        )
         return
     end
 
     draw.WordBox(
-        4, x, y - recipientsCount * (fontHeight + 6), Antagonist.GetPhrase(nil, "hear_certain_persons"),
+        4, x, y - recipientsCount * (fontHeight + 6), Antagonist.GetPhrase(nil, "hear_certain_persons") .. chatTypeStr,
         tag, backgroundColor, textColorGreen, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER
     )
 
@@ -65,4 +81,12 @@ end
 function GM:FinishChat()
     timer.Remove(tag)
     hook.Remove("HUDPaint", tag)
+end
+
+function GM:ChatTextChanged(text)
+    -- 0 - Talk, 1 - Yell, 2 - Whisper, 3 - Me
+    chatType = text:Left(3) == "/y " and 1
+                or text:Left(3) == "/w " and 2
+                or text:Left(4) == "/me " and 3
+                or 0
 end
