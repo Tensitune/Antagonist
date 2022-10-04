@@ -1,10 +1,9 @@
 Antagonist.Languages = Antagonist.Languages or {}
 
 local translations = {}
-local gmodLanguage = GetConVar("gmod_language"):GetString()
+local translationsPath = GM.ModulesRoot .. "/language/translations"
 
-local root = GM.FolderName .. "/gamemode/modules/language/translations/"
-local files = file.Find(root .. "*", "LUA")
+local gmodLanguage = GetConVar("gmod_language"):GetString()
 
 function Antagonist.AddTranslation(name, translation)
     translations[name] = translation
@@ -18,11 +17,4 @@ function Antagonist.GetPhrase(lang, name, ...)
     return translation[name] and translation[name]:format(...) or ""
 end
 
-for _, fileName in next, files do
-    if string.GetExtensionFromFilename(fileName) != "lua" then continue end
-
-    if SERVER then
-        AddCSLuaFile(root .. fileName)
-    end
-    include(root .. fileName)
-end
+TLL.LoadFiles(translationsPath, "SHARED")

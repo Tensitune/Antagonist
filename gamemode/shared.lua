@@ -1,6 +1,7 @@
 GM.Version = "0.0.1"
 GM.Name = "Antagonist"
 GM.Author = "Tensitune & dj-34"
+GM.ModulesRoot = GM.FolderName .. "/gamemode/modules"
 
 DeriveGamemode("sandbox")
 DEFINE_BASECLASS("gamemode_sandbox")

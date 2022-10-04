@@ -31,6 +31,25 @@ TLL.Types = {
     ["function"] = "function",
 }
 
+local function initFile(directoryPath, fileName)
+    if fileName:left(3) == "sv_" or fileName:left(7) == "server_" or fileName == "init.lua" then
+        if SERVER then
+            include(directoryPath .. "/" .. fileName)
+        end
+    elseif fileName:left(3) == "cl_" or fileName:left(7) == "client_" then
+        if SERVER then
+            AddCSLuaFile(directoryPath .. "/" .. fileName)
+        else
+            include(directoryPath .. "/" .. fileName)
+        end
+    else
+        if SERVER then
+            AddCSLuaFile(directoryPath .. "/" .. fileName)
+        end
+        include(directoryPath .. "/" .. fileName)
+    end
+end
+
 --- Validates a table against a schema.
 --- Schema example:
 --- * {
@@ -148,4 +167,63 @@ function TLL.TableToString(tbl, sort)
     end
 
     return str
+end
+
+--- Loads all lua files from a directory.
+--- @param directoryPath string @Directory path
+--- @param loadType string | nil @Optional - Whether SERVER, CLIENT or SHARED type
+function TLL.LoadFiles(directoryPath, loadType)
+    local files, directories = file.Find(directoryPath .. "/*.lua", "LUA")
+    loadType = string.lower(loadType)
+
+    for i = 1, #files do
+        local fileName = files[i]
+
+        if (loadType and loadType == "client") then
+            if SERVER then
+                AddCSLuaFile(directoryPath .. "/" .. fileName)
+            else
+                include(directoryPath .. "/" .. fileName)
+            end
+        elseif (loadType and loadType == "server") then
+            if SERVER then
+                include(directoryPath .. "/" .. fileName)
+            end
+        elseif (loadType and loadType == "shared") then
+            if SERVER then
+                AddCSLuaFile(directoryPath .. "/" .. fileName)
+            end
+            include(directoryPath .. "/" .. fileName)
+        else
+            initFile(directoryPath, fileName)
+        end
+    end
+
+    for i = 1, #directories do
+        local directory = directories[i]
+        local directoryFiles = file.Find(directoryPath .. "/" .. directory .. "/*.lua", "LUA")
+
+        for j = 1, #directoryFiles do
+            local directoryFile = directoryFiles[i]
+
+            if (loadType and loadType == "client") or (!loadType and directory == "client") then
+                if SERVER then
+                    AddCSLuaFile(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+                else
+                    include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+                end
+            elseif (loadType and loadType == "server") or (!loadType and directory == "server") then
+                if SERVER then
+                    include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+                end
+            elseif (loadType and loadType == "shared") then
+                if SERVER then
+                    AddCSLuaFile(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+                end
+                include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+            else
+                initFile(directoryPath, directoryFile)
+            end
+        end
+    end
 end
