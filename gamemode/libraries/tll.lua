@@ -32,11 +32,13 @@ TLL.Types = {
 }
 
 local function initFile(directoryPath, fileName)
-    if fileName:left(3) == "sv_" or fileName:left(7) == "server_" or fileName == "init.lua" then
+    local prefix = string.Explode("_", string.lower(fileName))[1]
+
+    if prefix == "sv" or prefix == "server" or prefix == "init.lua" then
         if SERVER then
             include(directoryPath .. "/" .. fileName)
         end
-    elseif fileName:left(3) == "cl_" or fileName:left(7) == "client_" then
+    elseif prefix == "cl" or prefix == "client" then
         if SERVER then
             AddCSLuaFile(directoryPath .. "/" .. fileName)
         else
@@ -174,7 +176,7 @@ end
 --- @param loadType string | nil @Optional - Whether SERVER, CLIENT or SHARED type
 function TLL.LoadFiles(directoryPath, loadType)
     local files, directories = file.Find(directoryPath .. "/*.lua", "LUA")
-    loadType = string.lower(loadType)
+    loadType = loadType and string.lower(loadType) or nil
 
     for i = 1, #files do
         local fileName = files[i]
