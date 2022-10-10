@@ -39,6 +39,10 @@ Antagonist.AddTranslation("ru", {
     sadmin = "супер администратора",
     coin_heads = "Орёл",
     coin_tails = "Решка",
+    healthy = "Здоров",
+    minorInjuries = "Небольшие травмы",
+    seriousInjuries = "Серьёзные травмы",
+    criticalInjuries = "При смерти",
 
     -- Civilian Roles
     role_civilian = "Персонал",

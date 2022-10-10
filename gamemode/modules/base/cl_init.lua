@@ -1,3 +1,7 @@
+function GM:HUDDrawTargetID()
+    return false
+end
+
 function GM:PlayerStartVoice(ply)
     if ply == LocalPlayer() then
         ply.IsTalking = true

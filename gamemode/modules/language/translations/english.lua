@@ -48,6 +48,10 @@ Antagonist.AddTranslation("en", {
     sadmin = "superadmin",
     coin_heads = "Heads",
     coin_tails = "Tails",
+    healthy = "Healthy",
+    minorInjuries = "Minor Injuries",
+    seriousInjuries = "Serious Injuries",
+    criticalInjuries = "Critical",
 
     -- Civilian Roles
     role_civilian = "Personnel",

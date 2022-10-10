@@ -143,8 +143,8 @@ function TLL.CheckTableValidation(schema, validateTable, validationString)
     return isValid
 end
 
---- Removes all entities found by class
---- @param class string @Entities class name
+--- Removes all entities found by class.
+--- @param class string @Entities class name.
 function TLL.RemoveAllByClass(class)
     local entities = ents.FindByClass(class)
 
@@ -172,8 +172,8 @@ function TLL.TableToString(tbl, sort)
 end
 
 --- Loads all lua files from a directory.
---- @param directoryPath string @Directory path
---- @param loadType string | nil @Optional - Whether SERVER, CLIENT or SHARED type
+--- @param directoryPath string @Directory path.
+--- @param loadType string | nil @Optional - SERVER, CLIENT or SHARED type.
 function TLL.LoadFiles(directoryPath, loadType)
     local files, directories = file.Find(directoryPath .. "/*.lua", "LUA")
     loadType = loadType and string.lower(loadType) or nil
@@ -227,5 +227,17 @@ function TLL.LoadFiles(directoryPath, loadType)
                 initFile(directoryPath, directoryFile)
             end
         end
+    end
+end
+
+if CLIENT then
+    --- Returns a number based on the size argument and your screen's height.
+    --- The screen's height is always equal to size 1080.
+    --- This function is primarily used for scaling font sizes.
+    ---
+    --- @param size number
+    --- @return number
+    function TLL.ScreenScale(size)
+        return math.ceil(size * (ScrH() / 1080))
     end
 end
