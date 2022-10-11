@@ -35,11 +35,11 @@ local function drawPlayerInfo(ply)
     if health >= 100 then
         healthStr, healthColor = Antagonist.GetPhrase(nil, "healthy"), healthyColor
     elseif health >= 50 then
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "minorInjuries"), minorInjuriesColor
+        healthStr, healthColor = Antagonist.GetPhrase(nil, "minor_injuries"), minorInjuriesColor
     elseif health >= 25 then
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "seriousInjuries"), seriousInjuriesColor
+        healthStr, healthColor = Antagonist.GetPhrase(nil, "serious_injuries"), seriousInjuriesColor
     else
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "criticalInjuries"), criticalInjuriesColor
+        healthStr, healthColor = Antagonist.GetPhrase(nil, "critical_injuries"), criticalInjuriesColor
     end
 
     alpha = Lerp(math.max(0, ply.InfoDelay - CurTime()), 0, alpha)

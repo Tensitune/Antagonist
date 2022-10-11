@@ -49,9 +49,9 @@ Antagonist.AddTranslation("en", {
     coin_heads = "Heads",
     coin_tails = "Tails",
     healthy = "Healthy",
-    minorInjuries = "Minor Injuries",
-    seriousInjuries = "Serious Injuries",
-    criticalInjuries = "Critical",
+    minor_injuries = "Minor Injuries",
+    serious_injuries = "Serious Injuries",
+    critical_injuries = "Critical",
 
     -- Civilian Roles
     role_civilian = "Personnel",

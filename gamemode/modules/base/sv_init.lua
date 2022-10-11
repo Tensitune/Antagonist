@@ -43,7 +43,7 @@ function GM:PlayerInitialSpawn(ply)
 
     ply.ID = ply:UserID()
 
-    ply:ChangeRole(Antagonist.Roles.Default)
+    ply:SetTeam(Antagonist.Roles.Default)
 
     -- Initialize canHearPlayers for player (used for voice radius check)
     canHearPlayers[ply.ID] = {}

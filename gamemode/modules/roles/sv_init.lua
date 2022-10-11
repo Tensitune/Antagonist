@@ -22,5 +22,5 @@ net.Receive("Antagonist.Roles", function(_, ply)
 
     if !canChange then return end
 
-    ply:ChangeRole(roleIndex)
+    ply:SetTeam(roleIndex)
 end)
