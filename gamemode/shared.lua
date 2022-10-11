@@ -22,7 +22,7 @@ include("libraries/sh_cami.lua")
 include("libraries/tll.lua")
 include("config/config.lua")
 
-local function LoadModules()
+do
     local root = GM.FolderName .. "/gamemode/modules/"
     local files, folders = file.Find(root .. "*", "LUA")
 
@@ -55,6 +55,5 @@ local function LoadModules()
         end
     end
 end
-LoadModules()
 
 include("config/roles.lua")

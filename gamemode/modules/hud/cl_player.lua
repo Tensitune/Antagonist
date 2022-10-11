@@ -67,7 +67,7 @@ timer.Create("Antagonist.HUD.Player", 1, 0, function()
     end
 end)
 
-local function agPostDrawTranslucentRenderables()
+hook.Add("PostDrawTranslucentRenderables", "Antagonist.HUD.Player", function()
     local localPlayer = LocalPlayer()
     local traceEntity = localPlayer:GetEyeTrace().Entity
 
@@ -87,5 +87,4 @@ local function agPostDrawTranslucentRenderables()
         if !IsValid(ply) then continue end
         drawPlayerInfo(ply)
     end
-end
-hook.Add("PostDrawTranslucentRenderables", "Antagonist.HUD.Player", agPostDrawTranslucentRenderables)
+end)
