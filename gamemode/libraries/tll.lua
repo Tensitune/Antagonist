@@ -172,23 +172,21 @@ function TLL.TableToString(tbl, sort)
 end
 
 --- Loads all lua files from a directory.
---- @param directoryPath string @Directory path.
 --- @param loadType string | nil @Optional - SERVER, CLIENT or SHARED type.
-function TLL.LoadFiles(directoryPath, loadType)
+--- @param directoryPath string @Directory path.
+function TLL.LoadFiles(loadType, directoryPath)
     local files, directories = file.Find(directoryPath .. "/*.lua", "LUA")
     loadType = loadType and string.lower(loadType) or nil
 
     for i = 1, #files do
         local fileName = files[i]
 
-        if (loadType and loadType == "client") then
+        if (loadType and loadType == "server") and SERVER then
+            include(directoryPath .. "/" .. fileName)
+        elseif (loadType and loadType == "client") then
             if SERVER then
                 AddCSLuaFile(directoryPath .. "/" .. fileName)
             else
-                include(directoryPath .. "/" .. fileName)
-            end
-        elseif (loadType and loadType == "server") then
-            if SERVER then
                 include(directoryPath .. "/" .. fileName)
             end
         elseif (loadType and loadType == "shared") then
@@ -208,14 +206,12 @@ function TLL.LoadFiles(directoryPath, loadType)
         for j = 1, #directoryFiles do
             local directoryFile = directoryFiles[i]
 
-            if (loadType and loadType == "client") or (!loadType and directory == "client") then
+            if ((loadType and loadType == "server") or (!loadType and directory == "server")) and SERVER then
+                include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+            elseif (loadType and loadType == "client") or (!loadType and directory == "client") then
                 if SERVER then
                     AddCSLuaFile(directoryPath .. "/" .. directory .. "/" .. directoryFile)
                 else
-                    include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
-                end
-            elseif (loadType and loadType == "server") or (!loadType and directory == "server") then
-                if SERVER then
                     include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
                 end
             elseif (loadType and loadType == "shared") then

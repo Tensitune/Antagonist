@@ -1,7 +1,7 @@
 GM.Version = "0.0.1"
 GM.Name = "Antagonist"
 GM.Author = "Tensitune & dj-34"
-GM.ModulesRoot = GM.FolderName .. "/gamemode/modules"
+GM.RootFolder = GM.FolderName .. "/gamemode"
 
 DeriveGamemode("sandbox")
 DEFINE_BASECLASS("gamemode_sandbox")
@@ -11,49 +11,52 @@ GM.Config = GM.Config or {}
 
 Antagonist = Antagonist or {}
 
-if SERVER then
-    AddCSLuaFile("libraries/sh_cami.lua")
-    AddCSLuaFile("libraries/tll.lua")
-    AddCSLuaFile("config/config.lua")
-    AddCSLuaFile("config/roles.lua")
-end
+function Antagonist.Load(side, path)
+    local lowerSide = string.lower(side)
 
-include("libraries/sh_cami.lua")
-include("libraries/tll.lua")
-include("config/config.lua")
-
-do
-    local root = GM.FolderName .. "/gamemode/modules/"
-    local files, folders = file.Find(root .. "*", "LUA")
-
-    for _, fileName in next, files do
-        if string.GetExtensionFromFilename(fileName) != "lua" then continue end
-        include(root .. fileName)
-    end
-
-    for _, folder in SortedPairs(folders, true) do
-        for _, fileName in SortedPairs(file.Find(root .. folder .. "/sh_*.lua", "LUA"), true) do
-            if SERVER then
-                AddCSLuaFile(root .. folder .. "/" .. fileName)
-            end
-
-            include(root .. folder .. "/" .. fileName)
-        end
-
-        if SERVER then
-            for _, fileName in SortedPairs(file.Find(root .. folder .. "/sv_*.lua", "LUA"), true) do
-                include(root .. folder .. "/" .. fileName)
-            end
-        end
-
-        for _, fileName in SortedPairs(file.Find(root .. folder .. "/cl_*.lua", "LUA"), true) do
-            if SERVER then
-                AddCSLuaFile(root .. folder .. "/" .. fileName)
-            else
-                include(root .. folder .. "/" .. fileName)
-            end
-        end
+    if lowerSide == "server" and SERVER then
+        include(path)
+    elseif lowerSide == "client" then
+        if SERVER then AddCSLuaFile(path) end
+        if CLIENT then include(path) end
+    elseif lowerSide == "shared" then
+        if SERVER then AddCSLuaFile(path) end
+        include(path)
     end
 end
 
-include("config/roles.lua")
+Antagonist.Load("SHARED", "libraries/sh_cami.lua")
+Antagonist.Load("SHARED", "libraries/tll.lua")
+
+Antagonist.Load("SHARED", "config/config.lua")
+Antagonist.Load("CLIENT", "config/fonts.lua")
+
+Antagonist.Load("SERVER", "core/libs/sv_notify.lua")
+Antagonist.Load("SHARED", "core/libs/sh_players.lua")
+Antagonist.Load("SHARED", "core/libs/sh_util.lua")
+Antagonist.Load("CLIENT", "core/libs/cl_notify.lua")
+
+Antagonist.Load("SERVER", "core/hooks/sv_hooks.lua")
+Antagonist.Load("SERVER", "core/hooks/sv_player.lua")
+
+Antagonist.Load("SHARED", "core/language/sh_language.lua")
+Antagonist.Load("SERVER", "core/language/sv_language.lua")
+Antagonist.Load("CLIENT", "core/language/cl_language.lua")
+
+Antagonist.Load("SERVER", "core/chat/sv_chat.lua")
+Antagonist.Load("SERVER", "core/chat/sv_util.lua")
+Antagonist.Load("SHARED", "core/chat/sh_commands.lua")
+Antagonist.Load("SERVER", "core/chat/sv_commands.lua")
+Antagonist.Load("CLIENT", "core/chat/cl_chat.lua")
+
+Antagonist.Load("SERVER", "core/voice/sv_voice.lua")
+Antagonist.Load("CLIENT", "core/voice/cl_voice.lua")
+
+Antagonist.Load("SHARED", "core/roles/sh_roles.lua")
+Antagonist.Load("SERVER", "core/roles/sv_roles.lua")
+Antagonist.Load("SHARED", "core/roles/sh_player_ext.lua")
+
+Antagonist.Load("CLIENT", "core/hud/cl_chat_listeners.lua")
+Antagonist.Load("CLIENT", "core/hud/cl_player.lua")
+
+Antagonist.Load("SHARED", "config/roles.lua")

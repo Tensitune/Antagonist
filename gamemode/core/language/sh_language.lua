@@ -1,7 +1,7 @@
 Antagonist.Languages = Antagonist.Languages or {}
 
 local translations = {}
-local translationsPath = GM.ModulesRoot .. "/language/translations"
+local translationsPath = GM.RootFolder .. "/config/translations"
 
 local gmodLanguage = GetConVar("gmod_language"):GetString()
 
@@ -17,4 +17,4 @@ function Antagonist.GetPhrase(lang, name, ...)
     return translation[name] and translation[name]:format(...) or ""
 end
 
-TLL.LoadFiles(translationsPath, "SHARED")
+TLL.LoadFiles("SHARED", translationsPath)

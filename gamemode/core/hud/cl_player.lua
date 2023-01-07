@@ -88,3 +88,7 @@ hook.Add("PostDrawTranslucentRenderables", "Antagonist.HUD.Player", function()
         drawPlayerInfo(ply)
     end
 end)
+
+function GM:HUDDrawTargetID()
+    return false
+end

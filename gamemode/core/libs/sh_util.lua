@@ -1,10 +1,3 @@
-function Antagonist.GetNickSortedPlayers()
-    local players = player.GetAll()
-    table.sort(players, function(a, b) return a:Nick() < b:Nick() end)
-
-    return players
-end
-
 local stringSub = string.sub
 function Antagonist.ExplodeArgs(args)
     local from, to, diff = 1, 0, 0

@@ -7,3 +7,11 @@ end
 function meta:GetRoleName()
     return team.GetName(self:Team()) or "Unknown"
 end
+
+if SERVER then return end
+
+function meta:ChangeRole(index)
+    net.Start("Antagonist.Roles")
+    net.WriteInt(index, 9)
+    net.SendToServer()
+end
