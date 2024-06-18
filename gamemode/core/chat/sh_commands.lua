@@ -1,72 +1,61 @@
-Antagonist.ChatCommands = Antagonist.ChatCommands or {}
+ag.chat.commandList = ag.chat.commandList or {}
 
-local chatCommandSchema = {
-    name = "string",
-    description = "string",
-    condition = "function",
-    delay = "number",
-    arguments = "table",
-}
-
-function Antagonist.DeclareChatCommand(command)
-    local valid = TLL.CheckTableValidation(chatCommandSchema, command, "chat command")
-    if !valid then return end
-
+function ag.chat.DeclareCommand(command)
     local name = string.lower(command.name)
-    Antagonist.ChatCommands[name] = Antagonist.ChatCommands[name] or command
+    ag.chat.commandList[name] = ag.chat.commandList[name] or command
 
     for k, v in next, command do
-        Antagonist.ChatCommands[name][k] = v
+        ag.chat.commandList[name][k] = v
     end
 end
 
-function Antagonist.RemoveChatCommand(name)
-    Antagonist.ChatCommands[string.lower(name)] = nil
+function ag.chat.RemoveCommand(name)
+    ag.chat.commandList[string.lower(name)] = nil
 end
 
-function Antagonist.GetChatCommand(name)
-    return Antagonist.ChatCommands[string.lower(name)]
+function ag.chat.GetCommand(name)
+    return ag.chat.commandList[string.lower(name)]
 end
 
-function Antagonist.GetChatCommands()
-    return Antagonist.ChatCommands
+function ag.chat.GetCommands()
+    return ag.chat.commandList
 end
 
 --[[---------------------------------------------------------------------------
 Chat commands
 ---------------------------------------------------------------------------]]
-Antagonist.DeclareChatCommand({
+ag.chat.DeclareCommand({
     name = "y",
-    description = Antagonist.GetPhrase(nil, "command_yell"),
+    description = ag.lang.GetPhrase("command_yell"),
     delay = 1,
 })
 
-Antagonist.DeclareChatCommand({
+ag.chat.DeclareCommand({
     name = "w",
-    description = Antagonist.GetPhrase(nil, "command_whisper"),
+    description = ag.lang.GetPhrase("command_whisper"),
     delay = 1,
 })
 
-Antagonist.DeclareChatCommand({
+ag.chat.DeclareCommand({
     name = "me",
-    description = Antagonist.GetPhrase(nil, "command_me"),
+    description = ag.lang.GetPhrase("command_me"),
     delay = 1,
 })
 
-Antagonist.DeclareChatCommand({
+ag.chat.DeclareCommand({
     name = "ooc",
-    description = Antagonist.GetPhrase(nil, "command_ooc"),
+    description = ag.lang.GetPhrase("command_ooc"),
     delay = 1,
 })
 
-Antagonist.DeclareChatCommand({
+ag.chat.DeclareCommand({
     name = "looc",
-    description = Antagonist.GetPhrase(nil, "command_looc"),
+    description = ag.lang.GetPhrase("command_looc"),
     delay = 1,
 })
 
-Antagonist.DeclareChatCommand({
+ag.chat.DeclareCommand({
     name = "flip",
-    description = Antagonist.GetPhrase(nil, "command_flip"),
+    description = ag.lang.GetPhrase("command_flip"),
     delay = 1,
 })

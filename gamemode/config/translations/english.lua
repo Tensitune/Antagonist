@@ -7,7 +7,7 @@ The parts between the quotes are the parts you should translate. You can also co
 You can copy missing phrases to this file and translate them.
 ---------------------------------------------------------------------------]]
 
-Antagonist.AddTranslation("en", {
+ag.lang.Add("english", {
     need_x_privelege = "You need %s privileges in order to perform this action!",
     no_privilege = "You don't have the right privileges to perform this action!",
 
@@ -36,12 +36,17 @@ Antagonist.AddTranslation("en", {
     action_flip = "flipped the coin and got %s",
 
     -- Commands
-    command_yell = "Yell in chat.",
     command_whisper = "Whisper in chat.",
     command_me = "Chat to describe your roleplay actions.",
     command_ooc = "Out of character non-roleplay global chat.",
     command_looc = "Out of character non-roleplay local chat.",
     command_flip = "Flip the coin.",
+
+    -- Options
+    option_close = "Close",
+    option_pickup = "Pick Up",
+    option_unload = "Unload (%s)",
+    option_unloaded = "Clip is empty",
 
     -- Misc
     admin = "admin",
@@ -52,6 +57,23 @@ Antagonist.AddTranslation("en", {
     minor_injuries = "Minor Injuries",
     serious_injuries = "Serious Injuries",
     critical_injuries = "Critical",
+
+    -- Inventory Slots
+    SLOT_HEAD = "Head",
+    SLOT_MASK = "Mask",
+    SLOT_EYES = "Eyes",
+    SLOT_EARS = "Ears",
+    SLOT_HANDS = "Hands",
+    SLOT_GLOVES = "Gloves",
+    SLOT_SHOES = "Shoes",
+    SLOT_BELT = "Belt",
+    SLOT_UNIFORM = "Uniform",
+    SLOT_OUTER_SUIT = "Outer Suit",
+    SLOT_BACK = "Back",
+    SLOT_ID = "ID",
+    SLOT_PDA = "PDA",
+    SLOT_LEFT_POCKET = "Left Pocket",
+    SLOT_RIGHT_POCKET = "Right Pocket",
 
     -- Civilian Roles
     role_civilian = "Personnel",

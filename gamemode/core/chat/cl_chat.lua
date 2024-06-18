@@ -15,7 +15,7 @@ function chat.AddNonParsedText(...)
     return chat.AddText(unpack(tbl))
 end
 
-net.Receive("Antagonist.Chat", function()
+net.Receive("ag.Chat", function()
     local ply = net.ReadEntity()
     if !IsValid(ply) then return end
 
@@ -27,22 +27,13 @@ net.Receive("Antagonist.Chat", function()
         prefixText = nick != "" and nick or ply:SteamName()
     end
 
-    local textColor = ply:Alive() and color_white or Color(255, 200, 200)
     local text = net.ReadString()
 
-    local shouldShow
     if text and text != "" then
-        shouldShow = hook.Call("OnPlayerChat", GM, ply, text, false, !ply:Alive(), prefixText, prefixColor, textColor)
-
-        if shouldShow != true then
-            chat.AddNonParsedText(prefixColor, prefixText, textColor, text)
-        end
+        local textColor = ply:Alive() and color_white or Color(255, 200, 200)
+        chat.AddNonParsedText(prefixColor, prefixText, textColor, text)
     else
-        shouldShow = hook.Call("ChatText", GM, "0", prefixText, prefixText, "ag")
-
-        if shouldShow != true then
-            chat.AddNonParsedText(prefixColor, prefixText)
-        end
+        chat.AddNonParsedText(prefixColor, prefixText)
     end
 
     chat.PlaySound()

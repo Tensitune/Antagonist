@@ -1,4 +1,4 @@
-Antagonist.AddTranslation("ru", {
+ag.lang.Add("russian", {
     need_x_privelege = "Вам нужны права %s для выполнения этого действия!",
     no_privilege = "У вас нет прав для выполнения этого действия!",
 
@@ -27,12 +27,17 @@ Antagonist.AddTranslation("ru", {
     action_flip = "подбросил монетку и получил %s",
 
     -- Commands
-    command_yell = "Крик в чате.",
     command_whisper = "Шёпот в чате.",
     command_me = "Чат для описания своих рп действий.",
     command_ooc = "Глобальный нон-рп чат.",
     command_looc = "Локальный нон-рп чат.",
     command_flip = "Подбросить монетку.",
+
+    -- Options
+    option_close = "Закрыть",
+    option_pickup = "Поднять",
+    option_unload = "Разрядить (%s)",
+    option_unloaded = "Обойма пуста",
 
     -- Misc
     admin = "администратора",
@@ -43,6 +48,23 @@ Antagonist.AddTranslation("ru", {
     minor_injuries = "Небольшие травмы",
     serious_injuries = "Серьёзные травмы",
     critical_injuries = "При смерти",
+
+    -- Inventory Slots
+    SLOT_HEAD = "Голова",
+    SLOT_MASK = "Маска",
+    SLOT_EYES = "Глаза",
+    SLOT_EARS = "Уши",
+    SLOT_HANDS = "Руки",
+    SLOT_GLOVES = "Перчатки",
+    SLOT_SHOES = "Обувь",
+    SLOT_BELT = "Пояс",
+    SLOT_UNIFORM = "Униформа",
+    SLOT_OUTER_SUIT = "Внешний Костюм",
+    SLOT_BACK = "Спина",
+    SLOT_ID = "ID",
+    SLOT_PDA = "PDA",
+    SLOT_LEFT_POCKET = "Левый Карман",
+    SLOT_RIGHT_POCKET = "Правый Карман",
 
     -- Civilian Roles
     role_civilian = "Персонал",

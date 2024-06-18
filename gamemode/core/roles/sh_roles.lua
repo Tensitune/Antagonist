@@ -1,39 +1,23 @@
-Antagonist.Roles = Antagonist.Roles or {}
-Antagonist.Roles.List = Antagonist.Roles.List or {}
+ag.role.list = ag.role.list or {}
 
-local roleSchema = {
-    name = "string",
-    color = IsColor,
-    model = { "string", "table" },
-    description = "string",
-    weapons = "table",
-    max = "number",
-    salary = "number",
-    customCheck = "function",
-    customCheckFailMsg = { "string", "function" },
-}
+function ag.role.Add(data)
+    local roleIndex = #ag.role.list + 1
 
-function Antagonist.CreateRole(role)
-    local valid = TLL.CheckTableValidation(roleSchema, role, "role creation")
-    if !valid then return end
+    ag.role.list[roleIndex] = data
+    team.SetUp(roleIndex, data.name, data.color)
 
-    local roleIndex = #Antagonist.Roles.List + 1
-
-    Antagonist.Roles.List[roleIndex] = role
-    team.SetUp(roleIndex, role.name, role.color)
-
-    if istable(role.model) then
-        local models = role.model
+    if istable(data.model) then
+        local models = data.model
         for i = 1, #models do
             util.PrecacheModel(models[i])
         end
     else
-        util.PrecacheModel(role.model)
+        util.PrecacheModel(data.model)
     end
 
     return roleIndex
 end
 
-function Antagonist.GetRole(index)
-    return Antagonist.Roles.List[index]
+function ag.role.Get(index)
+    return ag.role.list[index]
 end

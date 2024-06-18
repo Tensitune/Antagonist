@@ -1,14 +1,14 @@
 local function sendChatMessage(sender, recipient, prefix, message)
     if !IsValid(sender) and !recipient then return end
 
-    net.Start("Antagonist.Chat")
+    net.Start("ag.Chat")
     net.WriteEntity(sender)
     net.WriteString(prefix)
     net.WriteString(message)
     net.Send(recipient)
 end
 
-function Antagonist.TalkToRange(range, sender, prefix, message)
+function ag.chat.TalkToRange(range, sender, prefix, message)
     if !IsValid(sender) then return end
 
     if !prefix then prefix = "" end
@@ -32,7 +32,7 @@ function Antagonist.TalkToRange(range, sender, prefix, message)
     sendChatMessage(sender, filter, prefix, message)
 end
 
-function Antagonist.TalkToPerson(sender, recipient, prefix, message)
+function ag.chat.TalkToPerson(sender, recipient, prefix, message)
     if !IsValid(sender) or !IsValid(recipient) then return end
 
     if !prefix then prefix = "" end

@@ -1,6 +1,6 @@
-util.AddNetworkString("Antagonist.Roles")
+util.AddNetworkString("ag.Roles")
 
-net.Receive("Antagonist.Roles", function(_, ply)
+net.Receive("ag.Roles", function(_, ply)
     local roleIndex = net.ReadInt(9)
     local canChange = gamemode.Call("CanChangeRole", ply, roleIndex)
 
@@ -10,21 +10,40 @@ net.Receive("Antagonist.Roles", function(_, ply)
 end)
 
 function GM:CanChangeRole(ply, index)
-    local role = Antagonist.Roles.List[index]
+    local role = ag.role.list[index]
     if !role then return end
 
     if role.customCheck and !role.customCheck(ply) then
         local message = isfunction(role.customCheckFailMsg) and role.customCheckFailMsg(ply, role)
                             or role.customCheckFailMsg
-                            or Antagonist.GetPhrase(ply.Language, "unable_to_change_role", role.name)
+                            or ag.lang.GetPhrase("unable_to_change_role", role.name)
 
-        Antagonist.Notify(ply, NOTIFY_ERROR, 5, message)
+        ag.util.Notify(ply, NOTIFY_ERROR, 5, message)
         return false
     end
 
     return true
 end
 
-hook.Add("Antagonist.PlayerInitialSpawn", "Antagonist.Roles", function(ply)
-    ply:SetTeam(Antagonist.Roles.Default)
-end)
+function GM:PlayerLoadout(ply)
+    local role = ag.role.list[ply:Team()]
+    if !(role and role.weapons) then return true end
+
+    ply:SetSuppressPickupNotices(true)
+    ply:Give("ag_hands")
+    ply:SetSuppressPickupNotices(false)
+
+    return true
+end
+
+function GM:PlayerSetModel(ply)
+    local role = ag.role.list[ply:Team()]
+    if !(role and role.model) then return end
+
+    if istable(role.model) then
+        local tempModel = table.Random(role.model)
+        ply:SetModel(tempModel)
+    else
+        ply:SetModel(role.model)
+    end
+end

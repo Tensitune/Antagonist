@@ -1,5 +1,5 @@
 --[[-------------------------------------------------------------------------
-TLL - Tensitune's Lightweight Library for Garry's Mod
+Tensitune's Lightweight Library for Garry's Mod
 Copyright (c) 2022 Tensitune
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,146 +20,101 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -----------------------------------------------------------------------------]]
+local version = 20230713
+if tll and tll.version >= version then return end
 
-TLL = TLL or {}
-TLL.Types = {
-    ["string"] = "string",
-    ["number"] = "number",
-    ["bool"] = "boolean",
-    ["boolean"] = "boolean",
-    ["table"] = "table",
-    ["function"] = "function",
+tll = tll or {}
+tll.version = version
+
+tll.colors = {
+    primary = Color(253, 77, 89),
+    warning = Color(250, 180, 50),
+    white = Color(255, 255, 255),
+    path = Color(210, 210, 210),
 }
+
+local math_abs = math.abs
 
 local function initFile(directoryPath, fileName)
     local prefix = string.Explode("_", string.lower(fileName))[1]
+    local pathToFile = directoryPath .. "/" .. fileName
 
-    if prefix == "sv" or prefix == "server" or prefix == "init.lua" then
-        if SERVER then
-            include(directoryPath .. "/" .. fileName)
-        end
+    if (prefix == "sv" or prefix == "server") and SERVER then
+        tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
+        include(pathToFile)
     elseif prefix == "cl" or prefix == "client" then
-        if SERVER then
-            AddCSLuaFile(directoryPath .. "/" .. fileName)
-        else
-            include(directoryPath .. "/" .. fileName)
-        end
+        if SERVER then AddCSLuaFile(pathToFile) end
+        if CLIENT then include(pathToFile) end
     else
         if SERVER then
-            AddCSLuaFile(directoryPath .. "/" .. fileName)
+            AddCSLuaFile(pathToFile)
+            tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
         end
-        include(directoryPath .. "/" .. fileName)
+
+        include(pathToFile)
     end
 end
 
---- Validates a table against a schema.
---- Schema example:
---- * {
---- *     schemaStr = "string",
---- *     schemaFunc = "function",
---- *     schemaMultiType = { "string", "table" }
---- *     schemaCustomCheck = function(self) return isstring(self) or istable(self) end,
---- * }
---- @param schema table @The table validation schema.
---- @param validateTable table @The table to validate.
---- @param validationString table @String what table we are validating for ErrorNoHalt.
---- @return boolean @Whether the validation succeeded.
-function TLL.CheckTableValidation(schema, validateTable, validationString)
-    local stackTrace = debug.traceback()
+--- Just a logger.
+--- Prefix is optional, accepts many arguments.
+function tll.Log(prefix, ...)
+    local args = {...}
+    if #args == 0 then return end
 
-    local stackTraceStr = stackTrace:find("in main chunk")
-    stackTraceStr = string.Explode("\n\t", stackTrace:sub(1, stackTraceStr - 3))
-    stackTraceStr = stackTraceStr[#stackTraceStr]
+    local lastArg = args[#args]
 
-    local errorText
-    if type(schema) != "table" then
-        errorText = "[TLL Error] Schema must be a table! [" .. stackTraceStr .. "]\n"
-    end
-    if table.Count(schema) == 0 then
-        errorText = "[TLL Error] Schema must not be empty! [" .. stackTraceStr .. "]\n"
-    end
-    if type(validateTable) != "table" then
-        errorText = "[TLL Error] Table to validate against schema is not a table! [" .. stackTraceStr .. "]\n"
-    end
-    if table.Count(validateTable) == 0 then
-        errorText = "[TLL Error] Table to validate must not be empty! [" .. stackTraceStr .. "]\n"
+    if lastArg and type(lastArg) == "string" and string.Right(lastArg, 2) ~= "\n" then
+        args[#args] = lastArg .. "\n"
+    elseif lastArg and type(lastArg) ~= "string" then
+        args[#args + 1] = "\n"
     end
 
-    if errorText then
-        ErrorNoHalt(errorText)
-        return false
+    if prefix and type(prefix) == "string" then
+        MsgC(tll.colors.primary, "[" .. prefix .. "] ", tll.colors.white, unpack(args))
+    else
+        MsgC(tll.colors.white, unpack(args))
+    end
+end
+
+--- Returns a plural noun.
+--- one for number ending in 1.
+--- two for number ending in 2-4.
+--- five for number ending in 5+.
+function tll.GetNoun(num, one, two, five)
+    local n = math_abs(num) % 100;
+
+    if n >= 5 and n <= 20 then
+        return five;
     end
 
-    local isValid = true
-    errorText = ("[TLL Error] Incorrect %s! [%s]\nInvalid elements:\n"):format(validationString or "table", stackTraceStr)
-
-    for k, v in next, validateTable do
-        local schemaValue = schema[k]
-        local schemaValueType = type(schemaValue)
-        local schemaValueIsFunc = schemaValueType == "function"
-
-        local schemaTypeIsValid = false
-
-        if schemaValueType == "table" then
-            if #schemaValue == 0 then
-                ErrorNoHalt("[TLL Error] '" .. k .. "' types not found in schema! [" .. stackTraceStr .. "]\n")
-                return false
-            end
-
-            for i = 1, #schemaValue do
-                local value = schemaValue[i]
-                local schemaType = TLL.Types[value]
-
-                if !schemaType then
-                    ErrorNoHalt("[TLL Error] Invalid type of '" .. k .. "' in schema! '" .. value .. "' does not exist! [" .. stackTraceStr .. "]\n")
-                    return false
-                end
-
-                if type(v) == schemaType then
-                    schemaTypeIsValid = true
-                end
-            end
-        elseif schemaValueType == "string" then
-            local schemaType = TLL.Types[schemaValue]
-            if !schemaType then
-                ErrorNoHalt("[TLL Error] Invalid type of '" .. k .. "' in schema! '" .. schemaValue .. "' does not exist! [" .. stackTraceStr .. "]\n")
-                return false
-            end
-
-            schemaTypeIsValid = type(v) == schemaType
-        end
-
-        if !schemaTypeIsValid and !(schemaValueIsFunc and schemaValue(validateTable[k])) then
-            local schemaType = schemaValueType == "table" and "(must be a " .. TLL.TableToString(schemaValue) .. ")"
-                                    or schemaValueType == "function" and ""
-                                    or "(must be a " .. schemaValue .. ")"
-
-            errorText = errorText .. ("\t- %s %s\n"):format(k, schemaType)
-            isValid = false
-        end
+    n = n % 10;
+    if n == 1 then
+        return one;
     end
 
-    if !isValid then ErrorNoHalt(errorText) end
-    return isValid
+    if n >= 2 and n <= 4 then
+        return two;
+    end
+
+    return five;
 end
 
 --- Removes all entities found by class.
---- @param class string @Entities class name.
-function TLL.RemoveAllByClass(class)
+function tll.RemoveAllByClass(class)
     local entities = ents.FindByClass(class)
 
     for i = 1, #entities do
-        entities[i]:Remove()
+        local ent = entities[i]
+        if not IsValid(ent) then continue end
+
+        ent:Remove()
     end
 end
 
 --- Returns a string of table elements separated by commas.
---- @param tbl table @The table to convert to string.
---- @param sort bool @Whether to sort table.
---- @return string
-function TLL.TableToString(tbl, sort)
+function tll.TableToString(tbl, bSort)
     local tempTbl = tbl
-    if sort then table.sort(tempTbl) end
+    if bSort then table.sort(tempTbl) end
 
     local str = ""
     local tempTblLength = #tempTbl
@@ -171,29 +126,56 @@ function TLL.TableToString(tbl, sort)
     return str
 end
 
+--- Loads lua file from a path.
+--- loadSide is optional: SERVER / CLIENT / SHARED / nil
+function tll.Load(loadSide, pathToFile)
+    local lowerSide = string.lower(loadSide)
+    local fileFound = file.Find(pathToFile, "LUA")
+
+    if #fileFound == 0 then
+        tll.Log("TLL", "Could not find file: ", tll.colors.path, pathToFile)
+        return
+    end
+
+    if lowerSide == "server" and SERVER then
+        tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
+        include(pathToFile)
+    elseif lowerSide == "client" then
+        if SERVER then AddCSLuaFile(pathToFile) end
+        if CLIENT then include(pathToFile) end
+    elseif lowerSide == "shared" then
+        if SERVER then
+            AddCSLuaFile(pathToFile)
+            tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
+        end
+
+        include(pathToFile)
+    end
+end
+
 --- Loads all lua files from a directory.
---- @param loadType string | nil @Optional - SERVER, CLIENT or SHARED type.
---- @param directoryPath string @Directory path.
-function TLL.LoadFiles(loadType, directoryPath)
-    local files, directories = file.Find(directoryPath .. "/*.lua", "LUA")
-    loadType = loadType and string.lower(loadType) or nil
+--- loadSide is optional: SERVER / CLIENT / SHARED / nil
+function tll.LoadFiles(loadSide, directoryPath)
+    local lowerSide = loadSide and string.lower(loadSide) or nil
+    local files, directories = file.Find(directoryPath .. "/*", "LUA")
 
     for i = 1, #files do
         local fileName = files[i]
+        local pathToFile = directoryPath .. "/" .. fileName
 
-        if (loadType and loadType == "server") and SERVER then
-            include(directoryPath .. "/" .. fileName)
-        elseif (loadType and loadType == "client") then
+        if (lowerSide and lowerSide == "server") and SERVER then
+            tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
+            include(pathToFile)
+        elseif (lowerSide and lowerSide == "client") then
+            if SERVER then AddCSLuaFile(pathToFile) end
+            if CLIENT then include(pathToFile) end
+        elseif (lowerSide and lowerSide == "shared") then
             if SERVER then
-                AddCSLuaFile(directoryPath .. "/" .. fileName)
-            else
-                include(directoryPath .. "/" .. fileName)
+                AddCSLuaFile(pathToFile)
+                tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
             end
-        elseif (loadType and loadType == "shared") then
-            if SERVER then
-                AddCSLuaFile(directoryPath .. "/" .. fileName)
-            end
-            include(directoryPath .. "/" .. fileName)
+
+            include(pathToFile)
         else
             initFile(directoryPath, fileName)
         end
@@ -204,21 +186,22 @@ function TLL.LoadFiles(loadType, directoryPath)
         local directoryFiles = file.Find(directoryPath .. "/" .. directory .. "/*.lua", "LUA")
 
         for j = 1, #directoryFiles do
-            local directoryFile = directoryFiles[i]
+            local directoryFile = directoryFiles[j]
+            local pathToFile = directoryPath .. "/" .. directory .. "/" .. directoryFile
 
-            if ((loadType and loadType == "server") or (!loadType and directory == "server")) and SERVER then
-                include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
-            elseif (loadType and loadType == "client") or (!loadType and directory == "client") then
+            if ((lowerSide and lowerSide == "server") or (not lowerSide and directory == "server")) and SERVER then
+                tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
+                include(pathToFile)
+            elseif (lowerSide and lowerSide == "client") or (not lowerSide and directory == "client") then
+                if SERVER then AddCSLuaFile(pathToFile) end
+                if CLIENT then include(pathToFile) end
+            elseif (lowerSide and lowerSide == "shared") then
                 if SERVER then
-                    AddCSLuaFile(directoryPath .. "/" .. directory .. "/" .. directoryFile)
-                else
-                    include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+                    AddCSLuaFile(pathToFile)
+                    tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
                 end
-            elseif (loadType and loadType == "shared") then
-                if SERVER then
-                    AddCSLuaFile(directoryPath .. "/" .. directory .. "/" .. directoryFile)
-                end
-                include(directoryPath .. "/" .. directory .. "/" .. directoryFile)
+
+                include(pathToFile)
             else
                 initFile(directoryPath, directoryFile)
             end
@@ -227,13 +210,103 @@ function TLL.LoadFiles(loadType, directoryPath)
 end
 
 if CLIENT then
+    local math_ceil = math.ceil
+    local math_max = math.max
+    local string_sub = string.sub
+    local string_find = string.find
+    local string_gmatch = string.gmatch
+    local surface_SetFont = surface.SetFont
+    local surface_GetTextSize = surface.GetTextSize
+    local draw_SimpleText = draw.SimpleText
+
+    local function charWrap(text, remainingWidth, maxWidth)
+        local totalWidth = 0
+
+        text = text:gsub(".", function(char)
+            totalWidth = totalWidth + surface_GetTextSize(char)
+
+            if totalWidth >= remainingWidth then
+                totalWidth = surface_GetTextSize(char)
+                remainingWidth = maxWidth
+
+                return "\n" .. char
+            end
+
+            return char
+        end)
+
+        return text, totalWidth
+    end
+
     --- Returns a number based on the size argument and your screen's height.
     --- The screen's height is always equal to size 1080.
     --- This function is primarily used for scaling font sizes.
-    ---
-    --- @param size number
-    --- @return number
-    function TLL.ScreenScale(size)
-        return math.ceil(size * (ScrH() / 1080))
+    function tll.ScreenScale(size)
+        return math_ceil(size * (ScrH() / 1080))
+    end
+
+    --- Draws a multiline text on screen.
+    --- xAlign and yAlign is optional (TEXT_ALIGN_LEFT and TEXT_ALIGN_TOP by default)
+    function tll.DrawMultiLineText(text, font, x, y, maxWidth, addLineHeight, color, xAlign, yAlign)
+        local curX, curY = x, y
+        surface_SetFont(font)
+
+        local spaceWidth, lineHeight = surface_GetTextSize(" ")
+        local tabWidth = 50
+
+        local totalWidth = 0
+        local wrappedText = text:gsub("(%s?[%S]+)", function(word)
+            local char = string_sub(word, 1, 1)
+            if char == "\n" or char == "\t" then
+                totalWidth = 0
+            end
+
+            local wordWidth = surface_GetTextSize(word)
+            totalWidth = totalWidth + wordWidth
+
+            if wordWidth >= maxWidth then
+                local splitWord, splitPoint = charWrap(word, maxWidth - (totalWidth - wordWidth), maxWidth)
+                totalWidth = splitPoint
+
+                return splitWord
+            elseif totalWidth < maxWidth then
+                return word
+            end
+
+            if char == " " then
+                totalWidth = wordWidth - spaceWidth
+                return "\n" .. string_sub(word, 2)
+            end
+
+            totalWidth = wordWidth
+            return "\n" .. word
+        end)
+
+        xAlign = xAlign or TEXT_ALIGN_LEFT
+        yAlign = yAlign or TEXT_ALIGN_TOP
+
+        for str in string_gmatch(wrappedText, "[^\n]*") do
+            if #str > 0 then
+                if string_find(str, "\t") then
+                    for tabs, str2 in string_gmatch(str, "(\t*)([^\t]*)") do
+                        curX = math_ceil((curX + tabWidth * math_max(#tabs - 1, 0)) / tabWidth) * tabWidth
+
+                        if #str2 > 0 then
+                            draw_SimpleText(str2, font, curX, curY, color, xAlign, yAlign)
+
+                            local w, _ = surface_GetTextSize(str2)
+                            curX = curX + w
+                        end
+                    end
+                else
+                    draw_SimpleText(str, font, curX, curY, color, xAlign, yAlign)
+                end
+            else
+                curX = x
+                curY = curY + lineHeight + addLineHeight - 4
+            end
+        end
+
+        return curY
     end
 end

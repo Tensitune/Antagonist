@@ -1,15 +1,13 @@
-local tag = "Antagonist.Voice"
-
 local mathFloor = math.floor
 
-local voice3D = GM.Config.Voice3D
-local voiceRadius = GM.Config.VoiceRadius
-local dynamicVoice = GM.Config.DynamicVoice
-local deadVoice = GM.Config.DeadVoice
-local voiceDistance = GM.Config.VoiceDistance * GM.Config.VoiceDistance
+local voice3D = ag.config.voice3D
+local voiceRadius = ag.config.voiceRadius
+local dynamicVoice = ag.config.dynamicVoice
+local deadVoice = ag.config.deadVoice
+local voiceDistance = ag.config.voiceDistance * ag.config.voiceDistance
 
 local grid -- Grid based position check
-local gridSize = GM.Config.VoiceDistance -- Grid cell size is equal to the size of the radius of player talking
+local gridSize = ag.config.voiceDistance -- Grid cell size is equal to the size of the radius of player talking
 -- Translate player to grid coordinates. The first table maps players to x coordinates, the second table maps players to y coordinates.
 local playerToGrid = {{}, {}}
 
@@ -34,30 +32,23 @@ end
 local canHearPlayers, humans = {}, player.GetHumans()
 
 for i = 1, #humans do -- Recreate canHearPlayers after Lua Refresh
-    canHearPlayers[humans[i].ID] = {}
+    canHearPlayers[humans[i].id] = {}
 end
 
 function GM:PlayerCanHearPlayersVoice(listener, talker)
     if !deadVoice and !talker:Alive() then return false end
-    return !voiceRadius or canHearPlayers[listener.ID][talker.ID] == true, voice3D
+    return !voiceRadius or canHearPlayers[listener.id][talker.id] == true, voice3D
 end
 
-hook.Add("Antagonist.InitPostEntity", tag, function()
-    -- sv_alltalk must be 0
-    -- Note, everyone will STILL hear everyone UNLESS GM.Config.voiceradius is set to true
-    -- This will fix the GM.Config.VoiceRadius not working
-    game.ConsoleCommand("sv_alltalk 0\n")
-end)
+function GM:PlayerVoiceInit(ply)
+    canHearPlayers[ply.id] = {} -- Initialize canHearPlayers for player (used for voice radius check)
+end
 
-hook.Add("Antagonist.PlayerInitialSpawn", tag, function(ply)
-    canHearPlayers[ply.ID] = {} -- Initialize canHearPlayers for player (used for voice radius check)
-end)
+function GM:PlayerVoiceDisconnect(ply)
+    canHearPlayers[ply.id] = nil -- Clear to avoid memory leaks
+end
 
-hook.Add("Antagonist.PlayerDisconnected", tag, function(ply)
-    canHearPlayers[ply.ID] = nil -- Clear to avoid memory leaks
-end)
-
-timer.Create(tag, 0.3, 0, function()
+timer.Create("ag.Voice", 0.3, 0, function()
     -- if VoiceRadius is off, everyone can hear everyone
     if !voiceRadius then return end
 
@@ -83,10 +74,10 @@ timer.Create(tag, 0.3, 0, function()
         row[y] = cell
         grid[x] = row
 
-        playerToGrid[1][ply.ID] = x
-        playerToGrid[2][ply.ID] = y
+        playerToGrid[1][ply.id] = x
+        playerToGrid[2][ply.id] = y
 
-        canHearPlayers[ply.ID] = {} -- Initialize output variable
+        canHearPlayers[ply.id] = {} -- Initialize output variable
     end
 
     -- Check all neighbouring cells for every player.
@@ -94,8 +85,8 @@ timer.Create(tag, 0.3, 0, function()
     for i = 1, #players do
         local ply = players[i]
 
-        local gridX = playerToGrid[1][ply.ID]
-        local gridY = playerToGrid[2][ply.ID]
+        local gridX = playerToGrid[1][ply.id]
+        local gridY = playerToGrid[2][ply.id]
         local pos = ply:GetPos()
         local eyePos = ply:EyePos()
         local alive = ply:Alive()
@@ -120,8 +111,8 @@ timer.Create(tag, 0.3, 0, function()
                 local canTalk = pos:DistToSqr(cellPly:GetPos()) < voiceDistance
                                     and (!dynamicVoice or isInRoom(eyePos, cellPly:EyePos(), cellPly))
 
-                canHearPlayers[ply.ID][cellPly.ID] = canTalk and (deadVoice or cellPly:Alive())
-                canHearPlayers[cellPly.ID][ply.ID] = canTalk and (deadVoice or alive) -- Take advantage of the symmetry
+                canHearPlayers[ply.id][cellPly.id] = canTalk and (deadVoice or cellPly:Alive())
+                canHearPlayers[cellPly.id][ply.id] = canTalk and (deadVoice or alive) -- Take advantage of the symmetry
             end
         end
     end
@@ -145,8 +136,8 @@ timer.Create(tag, 0.3, 0, function()
                 local canTalk = prevPly:GetPos():DistToSqr(ply:GetPos()) < voiceDistance
                                     and (!dynamicVoice or isInRoom(prevPly:EyePos(), ply:EyePos(), ply))
 
-                canHearPlayers[prevPly.ID][ply.ID] = canTalk and (deadVoice or ply:Alive())
-                canHearPlayers[ply.ID][prevPly.ID] = canTalk and (deadVoice or prevPly:Alive()) -- Take advantage of the symmetry
+                canHearPlayers[prevPly.id][ply.id] = canTalk and (deadVoice or ply:Alive())
+                canHearPlayers[ply.id][prevPly.id] = canTalk and (deadVoice or prevPly:Alive()) -- Take advantage of the symmetry
             end
         end
     end

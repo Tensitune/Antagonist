@@ -12,6 +12,5 @@ function GM:InitPostEntity()
     game.ConsoleCommand("physgun_DampingFactor 0.9\n")
     game.ConsoleCommand("sv_sticktoground 0\n")
     game.ConsoleCommand("sv_airaccelerate 1000\n")
-
-    hook.Run("Antagonist.InitPostEntity")
+    game.ConsoleCommand("sv_alltalk 0\n")
 end

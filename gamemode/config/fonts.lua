@@ -1,31 +1,40 @@
-surface.CreateFont("Antagonist.ChatRecipients", {
+surface.CreateFont("ag.FontChatRecipients", {
     font = "Roboto",
-    size = TLL.ScreenScale(20),
+    size = tll.ScreenScale(20),
     weight = 500,
     antialias = true,
     shadow = true,
     extended = true,
 })
 
-surface.CreateFont("Antagonist.Title", {
+surface.CreateFont("ag.FontTitle", {
     font = "Roboto",
-    size = TLL.ScreenScale(22),
+    size = tll.ScreenScale(22),
     weight = 500,
     antialias = true,
     shadow = false,
     extended = true,
 })
 
-surface.CreateFont("Antagonist.Text", {
+surface.CreateFont("ag.FontText", {
     font = "Roboto",
-    size = TLL.ScreenScale(18),
+    size = tll.ScreenScale(18),
     weight = 500,
     antialias = true,
     shadow = false,
     extended = true,
 })
 
-surface.CreateFont("Antagonist.PlayerInfo", {
+surface.CreateFont("ag.FontInventorySlot", {
+    font = "Roboto",
+    size = tll.ScreenScale(14),
+    weight = 500,
+    antialias = true,
+    shadow = false,
+    extended = true,
+})
+
+surface.CreateFont("ag.FontPlayerInfo", {
     font = "Roboto",
     size = 140,
     weight = 600,

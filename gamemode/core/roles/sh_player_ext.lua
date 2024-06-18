@@ -11,7 +11,7 @@ end
 if SERVER then return end
 
 function meta:ChangeRole(index)
-    net.Start("Antagonist.Roles")
+    net.Start("ag.Roles")
     net.WriteInt(index, 9)
     net.SendToServer()
 end

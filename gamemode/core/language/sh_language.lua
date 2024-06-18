@@ -1,20 +1,17 @@
-Antagonist.Languages = Antagonist.Languages or {}
+ag.lang.list = ag.lang.list or {}
 
 local translations = {}
-local translationsPath = GM.RootFolder .. "/config/translations"
 
-local gmodLanguage = GetConVar("gmod_language"):GetString()
-
-function Antagonist.AddTranslation(name, translation)
+function ag.lang.Add(name, translation)
     translations[name] = translation
 
-    if table.HasValue(Antagonist.Languages, name) then return end
-    Antagonist.Languages[#Antagonist.Languages + 1] = name
+    if table.HasValue(ag.lang.list, name) then return end
+    ag.lang.list[#ag.lang.list + 1] = name
 end
 
-function Antagonist.GetPhrase(lang, name, ...)
-    local translation = translations[lang] or translations[gmodLanguage] or translations.en
-    return translation[name] and translation[name]:format(...) or ""
+function ag.lang.GetPhrase(name, ...)
+    local translation = translations[ag.config.language] or translations.english
+    return translation[name] and translation[name]:format(...) or "undefined"
 end
 
-TLL.LoadFiles("SHARED", translationsPath)
+tll.LoadFiles("SHARED", GM.RootFolder .. "/config/translations")

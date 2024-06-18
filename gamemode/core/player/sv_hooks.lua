@@ -1,62 +1,83 @@
 local function checkAdminSpawn(ply)
     if ply:IsSuperAdmin() then return true end
 
-    Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "need_x_privelege", Antagonist.GetPhrase(ply.Language, "sadmin")))
+    ag.util.Notify(ply, NOTIFY_ERROR, 5, ag.lang.GetPhrase("need_x_privelege", ag.lang.GetPhrase("sadmin")))
     return false
 end
 
 function GM:PlayerInitialSpawn(ply)
-    self.Sandbox.PlayerInitialSpawn(self, ply)
+    ply.id = ply:UserID()
+    ply.commandDelays = {}
 
-    ply.ID = ply:UserID()
-    ply.CommandDelays = {}
+    hook.Call("PlayerVoiceInit", self, ply)
+    hook.Call("PlayerInventoryInit", self, ply)
 
-    local group = self.Config.DefaultPlayerGroups[ply:SteamID()]
+    ply:SetTeam(ag.role.default)
+
+    local group = ag.config.defaultPlayerGroups[ply:SteamID()]
     if group then
         ply:SetUserGroup(group)
     end
+end
 
-    hook.Run("Antagonist.PlayerInitialSpawn", ply)
+function GM:PlayerSpawn(ply)
+    hook.Call("PlayerLoadout", self, ply)
+    hook.Call("PlayerSetModel", self, ply)
+
+    ply:SetupHands()
+
+    if ply:IsSpectator() then
+        ply:StripWeapons()
+        ply:StripAmmo()
+        ply:Spectate(OBS_MODE_ROAMING)
+        return
+    end
+
+    ply:SetCanZoom(false)
+    ply:SetJumpPower(160)
+    ply:SetCrouchedWalkSpeed(0.4)
+    ply:SetWalkSpeed(180)
+    ply:SetRunSpeed(320)
+    ply:SetMaxSpeed(320)
+end
+
+function GM:PlayerDeath(victim, inflictor, attacker)
+    hook.Call("PlayerInventoryInit", self, victim)
 end
 
 function GM:PlayerDisconnected(ply)
-    hook.Run("Antagonist.PlayerDisconnected", ply)
+    hook.Call("PlayerVoiceDisconnect", self, ply)
+    hook.Call("PlayerInventoryDisconnect", self, ply)
 end
 
 function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
     if ply:IsSpectator() then return end
 
-    if self.Config.DropWeaponDeath then
-        local playerWeapons = ply:GetWeapons()
-
-        for i = 1, #playerWeapons do
-            local weapon = playerWeapons[i]
-            if hook.Call("CanDropWeapon", self, weapon) then
-                ply:DropWeapon(weapon)
-            end
-        end
+    if ag.config.dropWeaponDeath then
+        hook.Call("DropWeapon", self, ply)
     end
+
+    hook.Call("PlayerInventoryInit", self, ply)
 
     self.Sandbox.DoPlayerDeath(self, ply, attacker, dmginfo, ...)
 end
 
--- Disable beep sound
 function GM:PlayerDeathSound()
     return true
 end
 
 function GM:PlayerSpawnProp(ply, model)
-    if self.Config.PropCrafting then
-        Antagonist.Notify(ply, NOTIFY_ERROR, 5, Antagonist.GetPhrase(ply.Language, "not_enough_resources"))
+    if ag.config.propCrafting then
+        ag.util.Notify(ply, NOTIFY_ERROR, 5, ag.lang.GetPhrase("not_enough_resources"))
         return false
     end
 
-    return self.Config.PropSpawning and self.Sandbox.PlayerSpawnProp(self, ply, model)
+    return ag.config.propSpawning and self.Sandbox.PlayerSpawnProp(self, ply, model)
 end
 
 function GM:PlayerSpawnedProp(ply, model, ent)
     self.Sandbox.PlayerSpawnedProp(self, ply, model, ent)
-    ent.ID = ply.ID
+    ent.id = ply.id
 end
 
 function GM:PlayerSpawnSWEP(ply, class, info)
@@ -96,11 +117,11 @@ function GM:ShowHelp(ply)
 end
 
 function GM:PlayerShouldTaunt(ply, actid)
-    return self.Config.AllowActs
+    return ag.config.allowActs
 end
 
 function GM:PlayerSpray()
-    return !self.Config.AllowSprays
+    return !ag.config.allowSprays
 end
 
 function GM:CanTool(ply, trace, mode)
@@ -135,22 +156,22 @@ function GM:CanDropWeapon(weapon)
     if !IsValid(weapon) then return false end
 
     local class = string.lower(weapon:GetClass())
-    if self.Config.DisallowDrop[class] then return false end
+    if ag.config.disallowDrop[class] then return false end
 
     return true
 end
 
 function GM:CanProperty(ply, property, ent)
-    if self.Config.AllowedProperties[property] then return true end
+    if ag.config.allowedProperties[property] then return true end
     if ply:IsSuperAdmin() then return true end
 
     return false
 end
 
 function GM:GetFallDamage(ply, fallSpeed)
-    if GetConVar("mp_falldamage"):GetBool() or self.Config.RealisticFallDamage then
-        return self.Config.FallDamageDamper and (fallSpeed / self.Config.FallDamageDamper) or (fallSpeed / 15)
+    if GetConVar("mp_falldamage"):GetBool() or ag.config.realisticFallDamage then
+        return ag.config.fallDamageDamper and (fallSpeed / ag.config.fallDamageDamper) or (fallSpeed / 15)
     else
-        return self.Config.FallDamageAmount or 10
+        return ag.config.fallDamageAmount or 10
     end
 end

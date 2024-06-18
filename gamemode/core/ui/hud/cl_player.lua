@@ -33,20 +33,20 @@ local function drawPlayerInfo(ply)
     local healthStr, healthColor
 
     if health >= 100 then
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "healthy"), healthyColor
+        healthStr, healthColor = ag.lang.GetPhrase("healthy"), healthyColor
     elseif health >= 50 then
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "minor_injuries"), minorInjuriesColor
+        healthStr, healthColor = ag.lang.GetPhrase("minor_injuries"), minorInjuriesColor
     elseif health >= 25 then
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "serious_injuries"), seriousInjuriesColor
+        healthStr, healthColor = ag.lang.GetPhrase("serious_injuries"), seriousInjuriesColor
     else
-        healthStr, healthColor = Antagonist.GetPhrase(nil, "critical_injuries"), criticalInjuriesColor
+        healthStr, healthColor = ag.lang.GetPhrase("critical_injuries"), criticalInjuriesColor
     end
 
     alpha = Lerp(math.max(0, ply.InfoDelay - CurTime()), 0, alpha)
     teamColor.a = alpha
     healthColor.a = alpha
 
-    local pos = ply:EyePos() + Vector(0, 0, 15)
+    local pos = ply:EyePos() + Vector(0, 0, 20)
     local posY = 0
 
     playerAngle.y = LocalPlayer():EyeAngles().y - 90
@@ -58,16 +58,15 @@ local function drawPlayerInfo(ply)
     camEnd3D2D()
 end
 
-timer.Create("Antagonist.HUD.Player", 1, 0, function()
+timer.Create("ag.PlayerHUD", 1, 0, function()
     for id, ply in next, playersToDraw do
         if !IsValid(ply) or ply.InfoDelay <= CurTime() then
             playersToDraw[id] = nil
-            continue
         end
     end
 end)
 
-hook.Add("PostDrawTranslucentRenderables", "Antagonist.HUD.Player", function()
+hook.Add("PostDrawTranslucentRenderables", "ag.PlayerHUD", function()
     local localPlayer = LocalPlayer()
     local traceEntity = localPlayer:GetEyeTrace().Entity
 
@@ -80,9 +79,7 @@ hook.Add("PostDrawTranslucentRenderables", "Antagonist.HUD.Player", function()
         end
     end
 
-    textPosY = 0
-
-    surfaceSetFont("Antagonist.PlayerInfo")
+    surfaceSetFont("ag.FontPlayerInfo")
     for _, ply in next, playersToDraw do
         if !IsValid(ply) then continue end
         drawPlayerInfo(ply)
