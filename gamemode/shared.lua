@@ -10,69 +10,48 @@ GM.Sandbox = BaseClass
 
 ag = ag or { util = {} }
 
-function ag.util.Load(side, path)
-    local lowerSide = string.lower(side)
-
-    if lowerSide == "server" and SERVER then
-        include(path)
-    elseif lowerSide == "client" then
-        if SERVER then AddCSLuaFile(path) end
-        if CLIENT then include(path) end
-    elseif lowerSide == "shared" then
-        if SERVER then AddCSLuaFile(path) end
-        include(path)
-    end
+if SERVER then
+    AddCSLuaFile("libraries/tll.lua")
 end
+include("libraries/tll.lua")
 
-ag.util.Load("SHARED", "libraries/sh_cami.lua")
-ag.util.Load("SHARED", "libraries/tll.lua")
-ag.util.Load("SHARED", "libraries/notifications.lua")
+tll.Load(GM.RootFolder .. "/libraries/sh_cami.lua")
+tll.Load(GM.RootFolder .. "/libraries/notifications.lua")
 
-ag.util.Load("SHARED", "config/config.lua")
-ag.util.Load("CLIENT", "config/fonts.lua")
+tll.Load(GM.RootFolder .. "/config/config.lua")
+tll.Load(GM.RootFolder .. "/config/fonts.lua", "CLIENT")
 
-ag.util.Load("SHARED", "core/sh_core.lua")
+tll.Load(GM.RootFolder .. "/core/sh_core.lua")
 
-ag.util.Load("SERVER", "core/hooks/sv_hooks.lua")
+tll.Load(GM.RootFolder .. "/core/hooks/sv_hooks.lua")
 
-ag.util.Load("SHARED", "core/network/sh_actions.lua")
-ag.util.Load("SERVER", "core/network/sv_actions.lua")
+tll.Load(GM.RootFolder .. "/core/network/sh_actions.lua")
+tll.Load(GM.RootFolder .. "/core/network/sv_actions.lua")
 
-ag.util.Load("SHARED", "core/player/sh_util.lua")
-ag.util.Load("SHARED", "core/player/sh_meta.lua")
-ag.util.Load("SHARED", "core/player/sv_hooks.lua")
+tll.Load(GM.RootFolder .. "/core/player/sh_util.lua")
+tll.Load(GM.RootFolder .. "/core/player/sh_meta.lua")
+tll.Load(GM.RootFolder .. "/core/player/sv_hooks.lua")
 
-ag.util.Load("SHARED", "core/language/sh_language.lua")
+tll.Load(GM.RootFolder .. "/core/language/sh_language.lua")
 
-ag.util.Load("SERVER", "core/chat/sv_chat.lua")
-ag.util.Load("SERVER", "core/chat/sv_util.lua")
-ag.util.Load("SHARED", "core/chat/sh_commands.lua")
-ag.util.Load("SERVER", "core/chat/sv_commands.lua")
-ag.util.Load("CLIENT", "core/chat/cl_chat.lua")
+tll.Load(GM.RootFolder .. "/core/chat/sv_chat.lua")
+tll.Load(GM.RootFolder .. "/core/chat/sv_util.lua")
+tll.Load(GM.RootFolder .. "/core/chat/sh_commands.lua")
+tll.Load(GM.RootFolder .. "/core/chat/sv_commands.lua")
+tll.Load(GM.RootFolder .. "/core/chat/cl_chat.lua")
 
-ag.util.Load("SERVER", "core/voice/sv_voice.lua")
-ag.util.Load("CLIENT", "core/voice/cl_voice.lua")
+tll.Load(GM.RootFolder .. "/core/voice/sv_voice.lua")
+tll.Load(GM.RootFolder .. "/core/voice/cl_voice.lua")
 
-ag.util.Load("SHARED", "core/inventory/sh_inventory.lua")
-ag.util.Load("SERVER", "core/inventory/sv_inventory.lua")
-ag.util.Load("CLIENT", "core/inventory/cl_inventory.lua")
-ag.util.Load("SERVER", "core/inventory/sv_player_ext.lua")
+tll.Load(GM.RootFolder .. "/core/inventory/sh_inventory.lua")
+tll.Load(GM.RootFolder .. "/core/inventory/sv_inventory.lua")
+tll.Load(GM.RootFolder .. "/core/inventory/cl_inventory.lua")
+tll.Load(GM.RootFolder .. "/core/inventory/sv_player_ext.lua")
 
-ag.util.Load("SHARED", "core/roles/sh_roles.lua")
-ag.util.Load("SERVER", "core/roles/sv_roles.lua")
-ag.util.Load("SHARED", "core/roles/sh_player_ext.lua")
+tll.Load(GM.RootFolder .. "/core/roles/sh_roles.lua")
+tll.Load(GM.RootFolder .. "/core/roles/sv_roles.lua")
+tll.Load(GM.RootFolder .. "/core/roles/sh_player_ext.lua")
 
-ag.util.Load("SHARED", "core/ui/sh_ui.lua")
+tll.Load(GM.RootFolder .. "/core/ui/sh_ui.lua")
 
-ag.util.Load("CLIENT", "core/ui/hud/cl_hud.lua")
-ag.util.Load("CLIENT", "core/ui/hud/cl_chat_listeners.lua")
-ag.util.Load("CLIENT", "core/ui/hud/cl_player.lua")
-
-ag.util.Load("CLIENT", "core/ui/vgui/button.lua")
-ag.util.Load("CLIENT", "core/ui/vgui/bubble_button.lua")
-ag.util.Load("CLIENT", "core/ui/vgui/inventory_button.lua")
-ag.util.Load("CLIENT", "core/ui/vgui/frame.lua")
-ag.util.Load("CLIENT", "core/ui/vgui/radial_menu.lua")
-ag.util.Load("CLIENT", "core/ui/vgui/inventory_menu.lua")
-
-ag.util.Load("SHARED", "config/roles.lua")
+tll.Load(GM.RootFolder .. "/config/roles.lua")

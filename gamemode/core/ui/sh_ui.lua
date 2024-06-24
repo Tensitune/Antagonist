@@ -1,7 +1,8 @@
+local folder = GM.RootFolder .. "/core/ui"
+
 if SERVER then
     util.AddNetworkString("ag.Radial")
     util.AddNetworkString("ag.Inventory")
-    return
 else
     net.Receive("ag.Radial", function()
         local entity = net.ReadEntity()
@@ -14,3 +15,6 @@ else
         vgui.Create("ag.Inventory")
     end)
 end
+
+tll.LoadFiles(folder .. "/vgui", "CLIENT")
+tll.LoadFiles(folder .. "/hud")

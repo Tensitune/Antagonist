@@ -14,4 +14,4 @@ function ag.lang.GetPhrase(name, ...)
     return translation[name] and translation[name]:format(...) or "undefined"
 end
 
-tll.LoadFiles("SHARED", GM.RootFolder .. "/config/translations")
+tll.LoadFiles(GM.RootFolder .. "/config/translations")

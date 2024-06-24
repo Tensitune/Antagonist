@@ -20,46 +20,62 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -----------------------------------------------------------------------------]]
-local version = 20230713
+local version = 20240624
 if tll and tll.version >= version then return end
 
 tll = tll or {}
 tll.version = version
 
 tll.colors = {
-    primary = Color(253, 77, 89),
-    warning = Color(250, 180, 50),
+    primary = Color(180, 140, 255),
+    success = Color(100, 255, 100),
+    error = Color(255, 100, 100),
+    warning = Color(255, 180, 90),
     white = Color(255, 255, 255),
-    path = Color(210, 210, 210),
+    path = Color(220, 220, 220),
 }
 
 local math_abs = math.abs
+local prefix = {
+    shared = { "sh", "shared" },
+    server = { "sv", "server" },
+    client = { "cl", "client" },
+}
 
-local function initFile(directoryPath, fileName)
-    local prefix = string.Explode("_", string.lower(fileName))[1]
-    local pathToFile = directoryPath .. "/" .. fileName
+--- Returns the color and prefix
+function tll.GetPrefix(prefixType)
+    local lowerType = prefixType and string.lower(prefixType) or ""
 
-    if (prefix == "sv" or prefix == "server") and SERVER then
-        tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-        include(pathToFile)
-    elseif prefix == "cl" or prefix == "client" then
-        if SERVER then AddCSLuaFile(pathToFile) end
-        if CLIENT then include(pathToFile) end
+    if lowerType == "error" then
+        return { tll.colors.error, "[ERROR] " }
+    elseif lowerType == "warning" then
+        return { tll.colors.warning, "[WARNING] " }
     else
-        if SERVER then
-            AddCSLuaFile(pathToFile)
-            tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-        end
-
-        include(pathToFile)
+        return { tll.colors.primary, "[TLL] " }
     end
 end
 
---- Just a logger.
---- Prefix is optional, accepts many arguments.
-function tll.Log(prefix, ...)
+--- Just a logger. Accepts many arguments.
+function tll.Log(...)
     local args = {...}
     if #args == 0 then return end
+
+    local shift = 0
+    for i = 1, #args do
+        local shiftedIndex = i + shift
+        local arg = args[shiftedIndex]
+
+        if istable(arg) then
+            for j = 1, #arg do
+                if j == 1 then
+                    table.remove(args, shiftedIndex)
+                end
+
+                table.insert(args, (shiftedIndex - 1) + j, arg[j])
+                shift = shift + 1
+            end
+        end
+    end
 
     local lastArg = args[#args]
 
@@ -69,11 +85,7 @@ function tll.Log(prefix, ...)
         args[#args + 1] = "\n"
     end
 
-    if prefix and type(prefix) == "string" then
-        MsgC(tll.colors.primary, "[" .. prefix .. "] ", tll.colors.white, unpack(args))
-    else
-        MsgC(tll.colors.white, unpack(args))
-    end
+    MsgC(tll.colors.white, unpack(args))
 end
 
 --- Returns a plural noun.
@@ -126,187 +138,192 @@ function tll.TableToString(tbl, bSort)
     return str
 end
 
+local function initFile(pathToFile, loadSide, bLogDisabled)
+    local lowerSide = loadSide ~= nil and string.lower(loadSide) or ""
+    local splittedPath = string.Explode("/", pathToFile)
+    local pathCount = #splittedPath
+
+    local directory = pathCount > 0 and string.lower(splittedPath[pathCount - 1]) or ""
+    local fileName = pathCount > 0 and splittedPath[pathCount] or pathToFile
+
+    local filePrefix = string.Explode("_", string.lower(fileName))[1]
+    local side = ""
+
+    if (lowerSide == "server" or directory == "server" or table.HasValue(prefix.server, filePrefix)) and SERVER then
+        side = "SERVER"
+        include(pathToFile)
+    elseif lowerSide == "client" or directory == "client" or table.HasValue(prefix.client, filePrefix) then
+        side = "CLIENT"
+
+        if SERVER then AddCSLuaFile(pathToFile) end
+        if CLIENT then include(pathToFile) end
+    else
+        side = "SHARED"
+
+        if SERVER then AddCSLuaFile(pathToFile) end
+        include(pathToFile)
+    end
+
+    if not bLogDisabled then
+        tll.Log(tll.colors.success, "Loaded " .. side, tll.colors.white, ": ", tll.colors.path, pathToFile)
+    end
+end
+
 --- Loads lua file from a path.
 --- loadSide is optional: SERVER / CLIENT / SHARED / nil
-function tll.Load(loadSide, pathToFile)
-    local lowerSide = string.lower(loadSide)
+function tll.Load(pathToFile, loadSide, bLogDisabled)
     local fileFound = file.Find(pathToFile, "LUA")
 
     if #fileFound == 0 then
-        tll.Log("TLL", "Could not find file: ", tll.colors.path, pathToFile)
+        if not bLogDisabled then
+            tll.Log(tll.GetPrefix("warning"), tll.colors.white, "Could not find file: ", tll.colors.path, pathToFile)
+        end
         return
     end
 
-    if lowerSide == "server" and SERVER then
-        tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-        include(pathToFile)
-    elseif lowerSide == "client" then
-        if SERVER then AddCSLuaFile(pathToFile) end
-        if CLIENT then include(pathToFile) end
-    elseif lowerSide == "shared" then
-        if SERVER then
-            AddCSLuaFile(pathToFile)
-            tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-        end
+    initFile(pathToFile, loadSide, bLogDisabled)
+end
 
-        include(pathToFile)
-    end
+local function sortFiles(a, b)
+    local prefixA = string.Explode("_", string.lower(a))[1]
+    local prefixB = string.Explode("_", string.lower(b))[1]
+
+    local aIsShared = table.HasValue(prefix.shared, prefixA)
+    local aIsServer = table.HasValue(prefix.server, prefixA)
+
+    local bIsShared = table.HasValue(prefix.shared, prefixB)
+    local bIsClient = table.HasValue(prefix.client, prefixB)
+
+    if aIsShared and not bIsShared then return true end
+    if aIsServer and bIsClient then return true end
+
+    return false
 end
 
 --- Loads all lua files from a directory.
 --- loadSide is optional: SERVER / CLIENT / SHARED / nil
-function tll.LoadFiles(loadSide, directoryPath)
-    local lowerSide = loadSide and string.lower(loadSide) or nil
+function tll.LoadFiles(directoryPath, loadSide, bLogDisabled)
     local files, directories = file.Find(directoryPath .. "/*", "LUA")
+    table.sort(files, sortFiles)
 
     for i = 1, #files do
         local fileName = files[i]
         local pathToFile = directoryPath .. "/" .. fileName
 
-        if (lowerSide and lowerSide == "server") and SERVER then
-            tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-            include(pathToFile)
-        elseif (lowerSide and lowerSide == "client") then
-            if SERVER then AddCSLuaFile(pathToFile) end
-            if CLIENT then include(pathToFile) end
-        elseif (lowerSide and lowerSide == "shared") then
-            if SERVER then
-                AddCSLuaFile(pathToFile)
-                tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-            end
-
-            include(pathToFile)
-        else
-            initFile(directoryPath, fileName)
-        end
+        initFile(pathToFile, loadSide, bLogDisabled)
     end
 
     for i = 1, #directories do
         local directory = directories[i]
         local directoryFiles = file.Find(directoryPath .. "/" .. directory .. "/*.lua", "LUA")
 
+        table.sort(directoryFiles, sortFiles)
+
         for j = 1, #directoryFiles do
-            local directoryFile = directoryFiles[j]
-            local pathToFile = directoryPath .. "/" .. directory .. "/" .. directoryFile
-
-            if ((lowerSide and lowerSide == "server") or (not lowerSide and directory == "server")) and SERVER then
-                tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-                include(pathToFile)
-            elseif (lowerSide and lowerSide == "client") or (not lowerSide and directory == "client") then
-                if SERVER then AddCSLuaFile(pathToFile) end
-                if CLIENT then include(pathToFile) end
-            elseif (lowerSide and lowerSide == "shared") then
-                if SERVER then
-                    AddCSLuaFile(pathToFile)
-                    tll.Log("TLL", "Loading file: ", tll.colors.path, pathToFile)
-                end
-
-                include(pathToFile)
-            else
-                initFile(directoryPath, directoryFile)
-            end
+            local pathToFile = directoryPath .. "/" .. directory .. "/" .. directoryFiles[j]
+            initFile(pathToFile, loadSide, bLogDisabled)
         end
     end
 end
 
-if CLIENT then
-    local math_ceil = math.ceil
-    local math_max = math.max
-    local string_sub = string.sub
-    local string_find = string.find
-    local string_gmatch = string.gmatch
-    local surface_SetFont = surface.SetFont
-    local surface_GetTextSize = surface.GetTextSize
-    local draw_SimpleText = draw.SimpleText
+if not CLIENT then return end
 
-    local function charWrap(text, remainingWidth, maxWidth)
-        local totalWidth = 0
+local math_ceil = math.ceil
+local math_max = math.max
+local string_sub = string.sub
+local string_find = string.find
+local string_gmatch = string.gmatch
+local surface_SetFont = surface.SetFont
+local surface_GetTextSize = surface.GetTextSize
+local draw_SimpleText = draw.SimpleText
 
-        text = text:gsub(".", function(char)
-            totalWidth = totalWidth + surface_GetTextSize(char)
+local function charWrap(text, remainingWidth, maxWidth)
+    local totalWidth = 0
 
-            if totalWidth >= remainingWidth then
-                totalWidth = surface_GetTextSize(char)
-                remainingWidth = maxWidth
+    text = text:gsub(".", function(char)
+        totalWidth = totalWidth + surface_GetTextSize(char)
 
-                return "\n" .. char
-            end
+        if totalWidth >= remainingWidth then
+            totalWidth = surface_GetTextSize(char)
+            remainingWidth = maxWidth
 
-            return char
-        end)
-
-        return text, totalWidth
-    end
-
-    --- Returns a number based on the size argument and your screen's height.
-    --- The screen's height is always equal to size 1080.
-    --- This function is primarily used for scaling font sizes.
-    function tll.ScreenScale(size)
-        return math_ceil(size * (ScrH() / 1080))
-    end
-
-    --- Draws a multiline text on screen.
-    --- xAlign and yAlign is optional (TEXT_ALIGN_LEFT and TEXT_ALIGN_TOP by default)
-    function tll.DrawMultiLineText(text, font, x, y, maxWidth, addLineHeight, color, xAlign, yAlign)
-        local curX, curY = x, y
-        surface_SetFont(font)
-
-        local spaceWidth, lineHeight = surface_GetTextSize(" ")
-        local tabWidth = 50
-
-        local totalWidth = 0
-        local wrappedText = text:gsub("(%s?[%S]+)", function(word)
-            local char = string_sub(word, 1, 1)
-            if char == "\n" or char == "\t" then
-                totalWidth = 0
-            end
-
-            local wordWidth = surface_GetTextSize(word)
-            totalWidth = totalWidth + wordWidth
-
-            if wordWidth >= maxWidth then
-                local splitWord, splitPoint = charWrap(word, maxWidth - (totalWidth - wordWidth), maxWidth)
-                totalWidth = splitPoint
-
-                return splitWord
-            elseif totalWidth < maxWidth then
-                return word
-            end
-
-            if char == " " then
-                totalWidth = wordWidth - spaceWidth
-                return "\n" .. string_sub(word, 2)
-            end
-
-            totalWidth = wordWidth
-            return "\n" .. word
-        end)
-
-        xAlign = xAlign or TEXT_ALIGN_LEFT
-        yAlign = yAlign or TEXT_ALIGN_TOP
-
-        for str in string_gmatch(wrappedText, "[^\n]*") do
-            if #str > 0 then
-                if string_find(str, "\t") then
-                    for tabs, str2 in string_gmatch(str, "(\t*)([^\t]*)") do
-                        curX = math_ceil((curX + tabWidth * math_max(#tabs - 1, 0)) / tabWidth) * tabWidth
-
-                        if #str2 > 0 then
-                            draw_SimpleText(str2, font, curX, curY, color, xAlign, yAlign)
-
-                            local w, _ = surface_GetTextSize(str2)
-                            curX = curX + w
-                        end
-                    end
-                else
-                    draw_SimpleText(str, font, curX, curY, color, xAlign, yAlign)
-                end
-            else
-                curX = x
-                curY = curY + lineHeight + addLineHeight - 4
-            end
+            return "\n" .. char
         end
 
-        return curY
+        return char
+    end)
+
+    return text, totalWidth
+end
+
+--- Returns a number based on the size argument and your screen's height.
+--- The screen's height is always equal to size 1080.
+--- This function is primarily used for scaling font sizes.
+function tll.ScreenScale(size)
+    return math_ceil(size * (ScrH() / 1080))
+end
+
+--- Draws a multiline text on screen.
+--- xAlign and yAlign is optional (TEXT_ALIGN_LEFT and TEXT_ALIGN_TOP by default)
+function tll.DrawMultiLineText(text, font, x, y, maxWidth, addLineHeight, color, xAlign, yAlign)
+    local curX, curY = x, y
+    surface_SetFont(font)
+
+    local spaceWidth, lineHeight = surface_GetTextSize(" ")
+    local tabWidth = 50
+
+    local totalWidth = 0
+    local wrappedText = text:gsub("(%s?[%S]+)", function(word)
+        local char = string_sub(word, 1, 1)
+        if char == "\n" or char == "\t" then
+            totalWidth = 0
+        end
+
+        local wordWidth = surface_GetTextSize(word)
+        totalWidth = totalWidth + wordWidth
+
+        if wordWidth >= maxWidth then
+            local splitWord, splitPoint = charWrap(word, maxWidth - (totalWidth - wordWidth), maxWidth)
+            totalWidth = splitPoint
+
+            return splitWord
+        elseif totalWidth < maxWidth then
+            return word
+        end
+
+        if char == " " then
+            totalWidth = wordWidth - spaceWidth
+            return "\n" .. string_sub(word, 2)
+        end
+
+        totalWidth = wordWidth
+        return "\n" .. word
+    end)
+
+    xAlign = xAlign or TEXT_ALIGN_LEFT
+    yAlign = yAlign or TEXT_ALIGN_TOP
+
+    for str in string_gmatch(wrappedText, "[^\n]*") do
+        if #str > 0 then
+            if string_find(str, "\t") then
+                for tabs, str2 in string_gmatch(str, "(\t*)([^\t]*)") do
+                    curX = math_ceil((curX + tabWidth * math_max(#tabs - 1, 0)) / tabWidth) * tabWidth
+
+                    if #str2 > 0 then
+                        draw_SimpleText(str2, font, curX, curY, color, xAlign, yAlign)
+
+                        local w, _ = surface_GetTextSize(str2)
+                        curX = curX + w
+                    end
+                end
+            else
+                draw_SimpleText(str, font, curX, curY, color, xAlign, yAlign)
+            end
+        else
+            curX = x
+            curY = curY + lineHeight + addLineHeight - 4
+        end
     end
+
+    return curY
 end
