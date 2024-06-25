@@ -31,7 +31,7 @@ function BUTTON:Paint(w, h)
     end
 
     local lines = string.Split(self.text, "\n")
-    draw.DrawText(self.text, agFontInventorySlot, w * 0.5, h * 0.5 - 7.5 * #lines, self.textColor, TEXT_ALIGN_CENTER)
+    draw.DrawText(self.text, "ag.FontInventorySlot", w * 0.5, h * 0.5 - 7.5 * #lines, self.textColor, TEXT_ALIGN_CENTER)
 end
 
 function BUTTON:DoClick()
