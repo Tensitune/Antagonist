@@ -38,6 +38,8 @@ ag.config.deadVoice = true
 --[[---------------------------------------------------------------------------
 Value settings
 ---------------------------------------------------------------------------]]
+-- MinimumPlayersToStart - Minimum number of players to start a round.
+ag.config.MinimumPlayersToStart = 1
 -- FallDamageDamper - The damper on realistic fall damage. Default is 15. Decrease this for more damage.
 ag.config.fallDamageDamper = 15
 -- FallDamageAmount - The base damage taken from falling for static fall damage. Default is 10.

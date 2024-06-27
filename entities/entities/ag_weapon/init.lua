@@ -28,10 +28,6 @@ function ENT:Use(activator, caller)
         end
         return
     end
-
-    net.Start("ag.Radial")
-    net.WriteEntity(self)
-    net.Send(activator)
 end
 
 function ENT:WeaponSetClips(weapon, playerHadWeapon)

@@ -34,10 +34,8 @@ ag.lang.Add("russian", {
     command_flip = "Подбросить монетку.",
 
     -- Options
-    option_close = "Закрыть",
     option_pickup = "Поднять",
-    option_unload = "Разрядить (%s)",
-    option_unloaded = "Обойма пуста",
+    option_unload = "Разрядить",
 
     -- Misc
     admin = "администратора",

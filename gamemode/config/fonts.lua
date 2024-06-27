@@ -1,4 +1,4 @@
-surface.CreateFont("ag.FontChatRecipients", {
+surface.CreateFont("ag.font.ChatRecipients", {
     font = "Roboto",
     size = tll.ScreenScale(20),
     weight = 500,
@@ -7,7 +7,7 @@ surface.CreateFont("ag.FontChatRecipients", {
     extended = true,
 })
 
-surface.CreateFont("ag.FontTitle", {
+surface.CreateFont("ag.font.Title", {
     font = "Roboto",
     size = tll.ScreenScale(22),
     weight = 500,
@@ -16,7 +16,7 @@ surface.CreateFont("ag.FontTitle", {
     extended = true,
 })
 
-surface.CreateFont("ag.FontText", {
+surface.CreateFont("ag.font.Text", {
     font = "Roboto",
     size = tll.ScreenScale(18),
     weight = 500,
@@ -25,7 +25,7 @@ surface.CreateFont("ag.FontText", {
     extended = true,
 })
 
-surface.CreateFont("ag.FontInventorySlot", {
+surface.CreateFont("ag.font.InventorySlot", {
     font = "Roboto",
     size = tll.ScreenScale(14),
     weight = 500,
@@ -34,7 +34,7 @@ surface.CreateFont("ag.FontInventorySlot", {
     extended = true,
 })
 
-surface.CreateFont("ag.FontPlayerInfo", {
+surface.CreateFont("ag.font.PlayerInfo", {
     font = "Roboto",
     size = 140,
     weight = 600,

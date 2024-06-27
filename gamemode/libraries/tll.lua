@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -----------------------------------------------------------------------------]]
-local version = 20240624
+local version = 20240626
 if tll and tll.version >= version then return end
 
 tll = tll or {}
@@ -164,7 +164,7 @@ local function initFile(pathToFile, loadSide, bLogDisabled)
         include(pathToFile)
     end
 
-    if not bLogDisabled then
+    if not bLogDisabled and SERVER then
         tll.Log(tll.colors.success, "Loaded " .. side, tll.colors.white, ": ", tll.colors.path, pathToFile)
     end
 end
@@ -175,7 +175,7 @@ function tll.Load(pathToFile, loadSide, bLogDisabled)
     local fileFound = file.Find(pathToFile, "LUA")
 
     if #fileFound == 0 then
-        if not bLogDisabled then
+        if not bLogDisabled and SERVER then
             tll.Log(tll.GetPrefix("warning"), tll.colors.white, "Could not find file: ", tll.colors.path, pathToFile)
         end
         return
@@ -204,6 +204,14 @@ end
 --- loadSide is optional: SERVER / CLIENT / SHARED / nil
 function tll.LoadFiles(directoryPath, loadSide, bLogDisabled)
     local files, directories = file.Find(directoryPath .. "/*", "LUA")
+
+    if #files == 0 and #directories == 0 then
+        if not bLogDisabled and SERVER then
+            tll.Log(tll.GetPrefix("warning"), tll.colors.white, "Could not find directory: ", tll.colors.path, directoryPath)
+        end
+        return
+    end
+
     table.sort(files, sortFiles)
 
     for i = 1, #files do

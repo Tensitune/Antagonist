@@ -43,10 +43,8 @@ ag.lang.Add("english", {
     command_flip = "Flip the coin.",
 
     -- Options
-    option_close = "Close",
     option_pickup = "Pick Up",
-    option_unload = "Unload (%s)",
-    option_unloaded = "Clip is empty",
+    option_unload = "Unload",
 
     -- Misc
     admin = "admin",
