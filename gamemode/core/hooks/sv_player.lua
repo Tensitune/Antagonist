@@ -27,6 +27,8 @@ function GM:PlayerInitialSpawn(ply)
         ply:SetUserGroup(group)
     end
 
+    ply:SetTeam(ag.role.default)
+
     hook.Call("PlayerVoiceInit", self, ply)
     hook.Call("PlayerInventoryInit", self, ply)
 
@@ -50,8 +52,6 @@ function GM:PlayerSpawn(ply)
 
     ply:SetupHands()
 
-    ply:SetTeam(ag.role.default)
-
     ply:SetCanZoom(false)
     ply:SetJumpPower(160)
     ply:SetCrouchedWalkSpeed(0.4)
@@ -67,6 +67,18 @@ function GM:PlayerDeath(victim, inflictor, attacker)
     victim:Flashlight(false)
     victim:Extinguish()
     victim:ExitVehicle()
+end
+
+function GM:DoPlayerDeath(ply, attacker, dmginfo, ...)
+    if ply:IsSpectator() then return end
+
+    if ag.config.dropWeaponDeath then
+        hook.Call("DropWeapon", self, ply)
+    end
+
+    hook.Call("PlayerInventoryInit", self, ply)
+
+    self.Sandbox.DoPlayerDeath(self, ply, attacker, dmginfo, ...)
 end
 
 function GM:PlayerDisconnected(ply)
