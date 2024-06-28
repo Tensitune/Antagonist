@@ -1,0 +1,4 @@
+[submodule "gamemode/libraries/tlib"]
+	path = gamemode/libraries/tlib
+	url = https://github.com/Tensitune/tlib
+	branch = master
