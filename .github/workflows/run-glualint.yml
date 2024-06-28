@@ -1,6 +1,9 @@
-name: GLuaFixer
+name: Run GLua Linter
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
 
 jobs:
