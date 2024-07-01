@@ -70,7 +70,6 @@ function GM:PlayerCanPickupWeapon(ply, weapon)
             ply:TakeItem(SLOT_HANDS)
         else
             ply:DropItem(SLOT_HANDS)
-            return true
         end
     end
 

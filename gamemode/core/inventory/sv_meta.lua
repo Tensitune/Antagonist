@@ -85,7 +85,7 @@ function meta:MoveItem(firstSlot, secondSlot)
 end
 
 function meta:GetItem(slot)
-    if ag.inventory.slots[slot] == nil then return false end
+    if ag.inventory.slots[slot] == nil then return nil end
     return ag.inventory.players[self.id][slot].item
 end
 
@@ -122,7 +122,7 @@ end
 
 function meta:SlotIsEmpty(slot)
     local item = self:GetItem(slot)
-    return item and table.IsEmpty(item) or true
+    return item and table.IsEmpty(item)
 end
 
 function meta:Give(class, bNoAmmo)

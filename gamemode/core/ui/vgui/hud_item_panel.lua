@@ -155,7 +155,7 @@ function PANEL:Think()
             net.SendToServer()
         end)
 
-        if entity:GetClip1() > 0 then
+        if entity.GetClip1 and entity:GetClip1() > 0 then
             self:AddOption(ag.lang.GetPhrase("option_unload"), function()
                 net.Start("ag.ActionWeapon")
                 net.WriteEntity(entity)

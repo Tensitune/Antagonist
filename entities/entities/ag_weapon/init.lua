@@ -33,15 +33,14 @@ end
 function ENT:WeaponSetClips(weapon, playerHadWeapon)
     local clip1, clip2 = self:GetClip1(), self:GetClip2()
 
+    if clip1 and clip1 != -1 and weapon:Clip1() != -1 then
+        weapon:SetClip1(clip1)
+    end
+
     if playerHadWeapon and clip2 and clip2 > 0 and weapon:Clip2() != -1 then
         weapon:SetClip2(weapon:Clip2() + clip2)
-        clip2 = 0
-    elseif clip1 and clip1 != -1 and weapon:Clip1() != -1 then
-        weapon:SetClip1(clip1)
-        clip1 = 0
     elseif clip2 and clip2 != -1 and weapon:Clip2() != -1 then
         weapon:SetClip2(clip2)
-        clip2 = 0
     end
 end
 
